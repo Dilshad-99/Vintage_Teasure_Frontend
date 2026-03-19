@@ -1,0 +1,221 @@
+/* ===== Edit Profile Page Styles ===== */
+
+.edit-profile-page {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.edit-profile-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.edit-profile-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  color: var(--white);
+  position: relative;
+  display: inline-block;
+}
+
+.edit-profile-header h2::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  margin: 12px auto 0;
+  border-radius: 2px;
+}
+
+.edit-profile-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.edit-profile-header .subtitle {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* ===== Form ===== */
+.edit-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.edit-profile-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.edit-profile-form .form-group {
+  margin-bottom: 20px;
+}
+
+.edit-profile-form .form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.edit-profile-form .form-group input[type="text"],
+.edit-profile-form .form-group select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  transition: var(--transition);
+  background: var(--bg-input);
+  color: var(--text);
+}
+
+.edit-profile-form .form-group input[type="text"]:focus,
+.edit-profile-form .form-group select:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+  background: var(--bg-elevated);
+}
+
+.edit-profile-form .form-group input::placeholder {
+  color: var(--text-dim);
+}
+
+/* ===== Select Dropdown ===== */
+.edit-profile-form .form-group select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%238a8a9a' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 24px;
+  padding-right: 40px;
+}
+
+.edit-profile-form .form-group select option {
+  background: var(--bg-card);
+  color: var(--text);
+  padding: 10px;
+}
+
+/* ===== Gender Radio ===== */
+.gender-group {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 10px 0;
+}
+
+.gender-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 14px;
+  transition: var(--transition);
+}
+
+.gender-option:hover {
+  color: var(--gold);
+}
+
+.edit-profile-form input[type="radio"] {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg-input);
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+}
+
+.edit-profile-form input[type="radio"]:checked {
+  border-color: var(--gold);
+  background: var(--bg-input);
+}
+
+.edit-profile-form input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: var(--gold);
+  border-radius: 50%;
+}
+
+.edit-profile-form input[type="radio"]:hover {
+  border-color: var(--gold-dark);
+}
+
+/* ===== Submit Button ===== */
+.edit-profile-form .btn-submit {
+  width: 100%;
+  padding: 15px 28px;
+  margin-top: 15px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: #0a0a0f;
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.25);
+}
+
+.edit-profile-form .btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(212, 175, 55, 0.4);
+  filter: brightness(1.1);
+}
+
+.edit-profile-form .btn-submit:active {
+  transform: translateY(0);
+}
+
+.edit-profile-form .btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .edit-profile-page {
+    padding: 25px;
+  }
+
+  .edit-profile-header h2 {
+    font-size: 24px;
+  }
+
+  .edit-profile-icon {
+    font-size: 36px;
+  }
+
+  .gender-group {
+    gap: 20px;
+  }
+}

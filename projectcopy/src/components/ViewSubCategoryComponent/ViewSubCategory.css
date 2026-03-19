@@ -1,0 +1,172 @@
+/* ===== View SubCategory Page Styles ===== */
+
+.view-subcategory-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.view-subcategory-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.view-subcategory-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  color: var(--white);
+  position: relative;
+  display: inline-block;
+}
+
+.view-subcategory-header h2::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  margin: 12px auto 0;
+  border-radius: 2px;
+}
+
+.view-subcategory-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.category-breadcrumb {
+  color: var(--gold);
+  font-size: 14px;
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+/* SubCategory Grid */
+.subcategory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px;
+}
+
+/* SubCategory Card */
+.subcategory-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: center;
+  text-decoration: none;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.subcategory-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-gold);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-gold);
+}
+
+.subcategory-card-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
+  transition: var(--transition);
+}
+
+.subcategory-card:hover .subcategory-card-image {
+  border-color: var(--gold);
+}
+
+.subcategory-card-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  transition: var(--transition);
+}
+
+.subcategory-card:hover .subcategory-card-name {
+  color: var(--gold);
+}
+
+/* Empty State */
+.subcategory-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  grid-column: 1 / -1;
+}
+
+.subcategory-empty-icon {
+  font-size: 64px;
+  display: block;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.subcategory-empty p {
+  font-size: 16px;
+}
+
+/* Back Link */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 20px;
+  transition: var(--transition);
+}
+
+.back-link:hover {
+  color: var(--gold);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .subcategory-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+  }
+
+  .subcategory-card {
+    padding: 15px;
+  }
+
+  .subcategory-card-image {
+    width: 80px;
+    height: 80px;
+  }
+
+  .subcategory-card-name {
+    font-size: 14px;
+  }
+}
+/* Back Link — works for both <Link> and <button> */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 20px;
+  transition: var(--transition);
+  background: none;   /* ← for button tag */
+  border: none;       /* ← for button tag */
+  padding: 0;         /* ← for button tag */
+  cursor: pointer;    /* ← for button tag */
+}
+
+.back-link:hover {
+  color: var(--gold);
+}

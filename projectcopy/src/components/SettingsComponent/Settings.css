@@ -1,0 +1,66 @@
+/* ===== Settings Dropdown ===== */
+
+.settings-dropdown {
+  position: relative;
+  list-style: none;
+}
+
+.settings-dropdown .dropdown-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.settings-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: rgba(20, 20, 25, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  min-width: 180px;
+  padding: 8px 0;
+  list-style: none;
+  margin: 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+:root[data-theme="light"] .settings-menu {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.settings-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.settings-item {
+  display: block;
+  padding: 12px 20px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-item:hover {
+  color: var(--gold);
+  background: rgba(212, 175, 55, 0.1);
+  padding-left: 25px;
+}
+
+.settings-item.active {
+  color: var(--gold);
+}

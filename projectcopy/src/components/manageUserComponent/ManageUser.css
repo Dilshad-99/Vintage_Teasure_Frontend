@@ -1,0 +1,279 @@
+/* ===== Manage Users Page ===== */
+
+.manage-user-section {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ===== Header ===== */
+.manage-user-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.manage-user-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.manage-user-section h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  color: var(--white);
+  margin-bottom: 8px;
+  position: relative;
+  display: inline-block;
+}
+
+.manage-user-section h2::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  margin: 12px auto 0;
+  border-radius: 2px;
+}
+
+.manage-user-count {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+/* ===== Empty State ===== */
+.manage-user-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.manage-user-empty span {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+/* ===== Table Wrapper ===== */
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-gold);
+}
+
+.manage-user-section table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-card);
+}
+
+.manage-user-section table thead th {
+  background: var(--bg-elevated);
+  color: var(--gold);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 2px solid var(--border-gold);
+  white-space: nowrap;
+}
+
+.manage-user-section table tbody td {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.manage-user-section table tbody tr:hover td {
+  background: var(--bg-card-hover);
+}
+
+.manage-user-section table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ===== Status Badges ===== */
+.status-active {
+  color: #2ecc71;
+  font-weight: 600;
+  background: rgba(46, 204, 113, 0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  display: inline-block;
+  border: 1px solid rgba(46, 204, 113, 0.2);
+}
+
+.status-inactive {
+  color: #e74c3c;
+  font-weight: 600;
+  background: rgba(231, 76, 60, 0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  display: inline-block;
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+/* ===== Action Buttons ===== */
+.action-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.btn-change-status {
+  color: var(--gold);
+  font-weight: 500;
+  cursor: pointer;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-gold);
+  background: transparent;
+  font-size: 12px;
+  transition: var(--transition);
+  display: inline-block;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-change-status:hover {
+  background: var(--gold-glow);
+  color: var(--gold-light);
+  box-shadow: var(--shadow-gold);
+}
+
+.btn-delete {
+  color: #e74c3c;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  background: transparent;
+  font-size: 12px;
+  transition: var(--transition);
+  display: inline-block;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-delete:hover {
+  background: rgba(231, 76, 60, 0.1);
+  color: #ff6b6b;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.15);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  .manage-user-section {
+    padding: 1rem;
+  }
+
+  .manage-user-section table thead th,
+  .manage-user-section table tbody td {
+    padding: 10px 10px;
+    font-size: 12px;
+  }
+}
+
+/* ===== Search ===== */
+.manage-user-search {
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px 16px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  transition: var(--transition);
+}
+
+.search-input::placeholder {
+  color: var(--text-dim);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+/* ===== Pagination ===== */
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: var(--transition);
+  min-width: 36px;
+}
+
+.page-btn:hover:not(:disabled) {
+  border-color: var(--border-gold);
+  color: var(--gold);
+  background: var(--bg-card-hover);
+}
+
+.page-btn.active {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  border-color: var(--gold);
+  color: #0a0a0f;
+  font-weight: 700;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-info {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-left: 8px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .search-input {
+    max-width: 100%;
+  }
+
+  .pagination {
+    justify-content: center;
+  }
+
+  .page-info {
+    width: 100%;
+    text-align: center;
+    margin-left: 0;
+    margin-top: 8px;
+  }
+}
