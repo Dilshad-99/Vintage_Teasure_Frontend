@@ -43,6 +43,8 @@ import fileUpload from 'express-fileupload'
 
 const app = express();
 
+const port = process.env.PORT
+
 import userRouter from "./32_user.Router_express.js"
 
 import ForgetPassword from './32_ForgetPassword.js';
@@ -79,8 +81,8 @@ app.use('/payment', PaymentRouter);
 
 app.use('/forgetpassword', ForgetPassword)
 
-app.listen(3001);
-console.log("Server invoked at link http://localhost:3001");
+app.listen(port);
+console.log(`Server invoked at link http://localhost:${port}`);
 
 
 // ************ FOR BUILDING AN API **************************

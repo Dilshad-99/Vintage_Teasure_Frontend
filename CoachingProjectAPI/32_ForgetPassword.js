@@ -6,7 +6,7 @@ const ForgetPassword=(req,res)=>{
    service: 'gmail',
    auth: {
      user: 'dilshad2307j@gmail.com',
-     pass: 'jnusjlrcvxewpwiz'
+     pass: process.env.PASS
    }
  });
 
