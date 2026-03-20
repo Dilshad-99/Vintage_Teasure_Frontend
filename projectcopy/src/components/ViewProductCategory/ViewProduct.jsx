@@ -6,42 +6,43 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useToast } from '../../ToastContext';
 
 function ViewProduct() {
-
   const { showToast } = useToast();
-  const params   = useParams();
+  const params = useParams();
   const navigate = useNavigate();
 
   const userEmail = localStorage.getItem('email');
-  const userRole  = localStorage.getItem('role');
+  const userRole = localStorage.getItem('role');
 
   const [productList, setProductList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errMsg, setErrMsg] = useState('');
 
-  // loadProducts function should be inside useEffect dependency array
   useEffect(() => {
+    const loadProducts = () => {
+      const query = { subcatnm: params.scnm, role: userRole };
+      if (userRole !== 'admin') query.addedby = userEmail;
+
+      axios.get(__productapiurl + "fetch", { params: query })
+        .then((response) => {
+          const list = response.data.userDetails || [];
+          setProductList(list);
+
+          if (list.length > 0) {
+            showToast(`${list.length} product(s) loaded!`, 'success');
+          } else {
+            showToast('No products found.', 'warning');
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          setErrMsg('Could not load products. Please try again.');
+          showToast('Failed to load products.', 'error');
+        })
+        .finally(() => setIsLoading(false));
+    };
+
     loadProducts();
-  }, [params.scnm, userRole, userEmail, showToast, navigate]); // Add necessary dependencies
-
-  const loadProducts = () => {
-    const query = { subcatnm: params.scnm, role: userRole };
-    if (userRole !== 'admin') query.addedby = userEmail;
-
-    axios.get(__productapiurl + "fetch", { params: query })
-      .then((response) => {
-        const list = response.data.userDetails || [];
-        setProductList(list);
-        list.length > 0
-          ? showToast(`${list.length} product(s) loaded!`, 'success')
-          : showToast('No products found.', 'warning');
-      })
-      .catch((error) => {
-        console.log(error);
-        setErrMsg('Could not load products. Please try again.');
-        showToast('Failed to load products.', 'error');
-      })
-      .finally(() => setIsLoading(false));
-  };
+  }, [params.scnm, userRole, userEmail, showToast]);
 
   return (
     <div className="view-product-page">
@@ -57,7 +58,7 @@ function ViewProduct() {
       </div>
 
       {isLoading && <p className="loading-msg">Loading products...</p>}
-      {errMsg    && <p className="error-msg">{errMsg}</p>}
+      {errMsg && <p className="error-msg">{errMsg}</p>}
 
       <div className="product-grid">
         {!isLoading && productList.length > 0 ? (

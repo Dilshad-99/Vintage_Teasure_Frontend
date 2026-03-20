@@ -24,7 +24,7 @@ function AddReview() {
       showToast('Only admins can add reviews.', 'error');
       navigate(-1);
     }
-  }, []);
+  }, [showToast, navigate, userRole]);
 
   if (userRole !== 'admin') return null;
 
