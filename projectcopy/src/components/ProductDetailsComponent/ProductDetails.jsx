@@ -6,7 +6,6 @@ import { __productapiurl } from '../../API_URL';
 import { useToast } from '../../ToastContext';
 
 function ProductDetail() {
-
   const { showToast } = useToast();
   const navigate = useNavigate();
   const params   = useParams();
@@ -14,8 +13,8 @@ function ProductDetail() {
 
   const userRole = localStorage.getItem('role');
 
-  const [ product, setProduct ]     = useState(null);
-  const [ isLoading, setIsLoading ] = useState(true);
+  const [product, setProduct] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!params.id || isNaN(Number(params.id))) {
@@ -24,7 +23,7 @@ function ProductDetail() {
       return;
     }
 
-    axios.get(__productapiurl + "fetch", { params : { "_id" : params.id } })
+    axios.get(__productapiurl + "fetch", { params: { "_id": params.id } })
       .then((response) => {
         const data = response.data.userDetails;
         if (data && data.length > 0) {
@@ -40,14 +39,13 @@ function ProductDetail() {
         navigate(-1);
       })
       .finally(() => setIsLoading(false));
-  }, [params.id]);
+  }, [params.id, navigate, showToast]); // Added missing dependencies
 
   if (isLoading) return <p className="loading-msg">Loading product details...</p>;
-  if (!product)  return null;
+  if (!product) return null;
 
   return (
     <div className="product-detail-page">
-
       <div className="product-detail-actions">
         <button className="back-link" onClick={() => navigate(-1)}>← Back to Products</button>
         <button className="download-btn" onClick={() => window.print()}>⬇️ Download PDF</button>
@@ -57,7 +55,6 @@ function ProductDetail() {
       </div>
 
       <div className="product-detail-card" ref={printRef} id="print-root">
-
         <div className="product-detail-header">
           <img
             src={`/assets/uploads/producticons/${product.producticonnm}`}
@@ -77,7 +74,6 @@ function ProductDetail() {
         </div>
 
         <div className="product-detail-body">
-
           <div className="product-detail-section">
             <h3>Description</h3>
             <p>{product.description || 'No description available.'}</p>
@@ -108,7 +104,6 @@ function ProductDetail() {
 
         </div>
       </div>
-
     </div>
   );
 }

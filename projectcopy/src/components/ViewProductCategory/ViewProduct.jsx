@@ -14,19 +14,20 @@ function ViewProduct() {
   const userEmail = localStorage.getItem('email');
   const userRole  = localStorage.getItem('role');
 
-  const [ productList, setProductList ] = useState([]);
-  const [ isLoading, setIsLoading ]     = useState(true);
-  const [ errMsg, setErrMsg ]           = useState('');
+  const [productList, setProductList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errMsg, setErrMsg] = useState('');
 
+  // loadProducts function should be inside useEffect dependency array
   useEffect(() => {
     loadProducts();
-  }, [params.scnm]);
+  }, [params.scnm, userRole, userEmail, showToast, navigate]); // Add necessary dependencies
 
   const loadProducts = () => {
-    const query = { subcatnm : params.scnm, role : userRole };
+    const query = { subcatnm: params.scnm, role: userRole };
     if (userRole !== 'admin') query.addedby = userEmail;
 
-    axios.get(__productapiurl + "fetch", { params : query })
+    axios.get(__productapiurl + "fetch", { params: query })
       .then((response) => {
         const list = response.data.userDetails || [];
         setProductList(list);
@@ -69,7 +70,7 @@ function ViewProduct() {
                 onError={e => e.target.src = '/assets/placeholder.png'}
               />
               <span className="product-card-name">{product.title}</span>
-              {product.price       && <span className="product-card-price">₹{product.price}</span>}
+              {product.price && <span className="product-card-price">₹{product.price}</span>}
               {product.description && <p className="product-card-desc">{product.description}</p>}
 
               <Link to={`/productdetail/${product._id}`} className="product-detail-btn">

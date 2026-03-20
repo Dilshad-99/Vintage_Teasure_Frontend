@@ -11,15 +11,16 @@ function ManageUser() {
 
   const { showToast } = useToast();
 
-  const [ users, setUsers ]     = useState([]);
-  const [ loading, setLoading ] = useState(true);
-  const [ search, setSearch ]   = useState('');
-  const [ page, setPage ]       = useState(1);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
 
-  useEffect(() => { fetchUsers(); }, []);
+  // Add page and search as dependencies
+  useEffect(() => { fetchUsers(); }, [page, search]); // Add dependencies here
 
   const fetchUsers = () => {
-    axios.get(__userapiurl + "fetch", { params : { "role" : "user" } })
+    axios.get(__userapiurl + "fetch", { params: { "role": "user" } })
       .then((response) => setUsers(response.data.userDetails || []))
       .catch((error) => { console.log(error); showToast('Failed to load users.', 'error'); })
       .finally(() => setLoading(false));
@@ -27,21 +28,21 @@ function ManageUser() {
 
   const updateStatus = (_id, action) => {
     if (action === 'delete') {
-      axios.delete(__userapiurl + "delete", { data : { _id } })
+      axios.delete(__userapiurl + "delete", { data: { _id } })
         .then(() => { showToast('User deleted.', 'success'); fetchUsers(); })
         .catch((error) => { console.log(error); showToast('Failed to delete user.', 'error'); });
     } else {
       const status = action === 'active' ? 1 : 0;
-      axios.patch(__userapiurl + "update", { condition_obj : { _id }, content_obj : { status } })
+      axios.patch(__userapiurl + "update", { condition_obj: { _id }, content_obj: { status } })
         .then(() => { showToast(action === 'active' ? 'User activated! ✅' : 'User deactivated.', action === 'active' ? 'success' : 'warning'); fetchUsers(); })
         .catch((error) => { console.log(error); showToast('Failed to update user.', 'error'); });
     }
   };
 
-  const filtered   = users.filter(u => [u.name, u.email, u.city].some(f => f?.toLowerCase().includes(search.toLowerCase())));
+  const filtered = users.filter(u => [u.name, u.email, u.city].some(f => f?.toLowerCase().includes(search.toLowerCase())));
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
-  const shown      = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
-  const goTo       = (p) => p >= 1 && p <= totalPages && setPage(p);
+  const shown = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const goTo = (p) => p >= 1 && p <= totalPages && setPage(p);
 
   return (
     <div className="manage-user-section">
@@ -108,9 +109,9 @@ function ManageUser() {
 
           {totalPages > 1 && (
             <div className="pagination">
-              <button className="page-btn" onClick={() => goTo(1)}        disabled={page === 1}>«</button>
+              <button className="page-btn" onClick={() => goTo(1)} disabled={page === 1}>«</button>
               <button className="page-btn" onClick={() => goTo(page - 1)} disabled={page === 1}>‹</button>
-              {Array.from({ length : totalPages }, (_, i) => i + 1).map((p) => (
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                 <button key={p} className={`page-btn ${page === p ? 'active' : ''}`} onClick={() => goTo(p)}>{p}</button>
               ))}
               <button className="page-btn" onClick={() => goTo(page + 1)} disabled={page === totalPages}>›</button>
