@@ -22,7 +22,7 @@ import UserSchemaModel from './32_User.model_express.js'; // Yeh line User schem
 export const save=async(req,res)=>{  // SAVE [OO0RRR] REGISTER.   // 
  // Get the highest _id from database to avoid duplicates
  const lastUser = await UserSchemaModel.find();
- const l=lastUser.length();
+ const l=lastUser.length;
  const _id = l == 0?1:lastUser[l-1]._id+1;
 //  const _id=l==0?1:users[l-1]._id+1;
  const userDetails={...req.body,"_id":_id,"status":0,"role":"user","info":Date()}; // Yeh line ek object bana rahi hai jisme naye user ke saare details honge. req.body se jo data aaya hai, usko spread operator ... ke through add kiya ja raha hai, aur saath mein _id, status, role, aur info bhi set kiya ja raha hai.

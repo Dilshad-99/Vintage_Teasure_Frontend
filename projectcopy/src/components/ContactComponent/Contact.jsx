@@ -2,6 +2,11 @@ import { useState } from 'react';
 import './Contact.css';
 import { useToast } from '../../ToastContext';
 
+const WHATSAPP_NUMBER = "91 7898561191";
+const WHATSAPP_MESSAGE = "Hello! I need help with my order.";
+const SHOP_LAT = 22.7196;
+const SHOP_LNG = 75.8577;
+
 function Contact() {
   const { showToast } = useToast();
   const [formData, setFormData] = useState({
@@ -15,15 +20,11 @@ function Contact() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (!formData.name || !formData.email || !formData.subject || !formData.message) {
       showToast("Please fill in all fields.", "warning");
       return;
     }
-
     setLoading(true);
-
-    // simulate sending
     setTimeout(() => {
       showToast("Message sent! We'll get back to you soon. 👋", "success");
       setFormData({ name: '', email: '', subject: '', message: '' });
@@ -31,13 +32,75 @@ function Contact() {
     }, 1000);
   };
 
+  const handleWhatsApp = () => {
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
+    window.open(url, '_blank');
+  };
+
+  const handleLocation = () => {
+    window.open(`https://www.google.com/maps?q=${SHOP_LAT},${SHOP_LNG}`, '_blank');
+  };
+
   return (
     <div className="page-section contact-page">
-      <h2>Let's Talk 👋</h2>
-      <p className="subtitle">Got a question? Want a quote? Just wanna say hi? We're all ears.</p>
 
-      <div className="contact-layout">
+      {/* ===== Header ===== */}
+      <div className="contact-header">
+        <h2>Let's Talk 👋</h2>
+        <p className="subtitle">Got a question? Want a quote? Just wanna say hi? We're all ears.</p>
+      </div>
+
+      {/* ===== Info Strip — top pe ===== */}
+      <div className="contact-strip">
+        <div className="strip-item">
+          <span>🙋</span>
+          <div>
+            <h5>Visit Us</h5>
+            <p>123 Main Street, City</p>
+          </div>
+        </div>
+        <div className="strip-item">
+          <span>📞</span>
+          <div>
+            <h5>Call Us</h5>
+            <p>(555) 123-4567</p>
+          </div>
+        </div>
+        <div className="strip-item">
+          <span>📧</span>
+          <div>
+            <h5>Email Us</h5>
+            <p>hello@vintageteasure.com</p>
+          </div>
+        </div>
+        <div className="strip-item strip-whatsapp" onClick={handleWhatsApp}>
+          <span>
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+              alt="WhatsApp"
+              width="22"
+            />
+          </span>
+          <div>
+            <h5>WhatsApp</h5>
+            <p>Reply within minutes!</p>
+          </div>
+        </div>
+        <div className="strip-item strip-location" onClick={handleLocation}>
+          <span>📍</span>
+          <div>
+            <h5>Directions</h5>
+            <p>Open Google Maps</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== Form + Map side by side ===== */}
+      <div className="contact-main">
+
         <form className="contact-form" onSubmit={handleSubmit}>
+          <h3>Send Us a Message</h3>
+
           <div className="form-row">
             <div className="form-group">
               <label>Your Name</label>
@@ -91,33 +154,19 @@ function Contact() {
           </button>
         </form>
 
-        <div className="contact-info-cards">
-          <div className="info-card">
-            <span className="info-icon">🙋</span>
-            <h4>Stop By Anytime</h4>
-            <p>
-              123 Main Street<br />
-              City, State 12345<br />
-              <span className="info-note">Free parking in the back!</span>
-            </p>
-          </div>
-          <div className="info-card">
-            <span className="info-icon">📞</span>
-            <h4>Give Us a Ring</h4>
-            <p>
-              (555) 123-4567<br />
-              <span className="info-note">Mon-Sat, 9am-7pm<br />We pick up, promise.</span>
-            </p>
-          </div>
-          <div className="info-card">
-            <span className="info-icon">📧</span>
-            <h4>Drop Us a Line</h4>
-            <p>
-              hello@pawnstar.com<br />
-              <span className="info-note">Usually reply within a few hours</span>
-            </p>
-          </div>
+        {/* ===== Map ===== */}
+        <div className="contact-map">
+          <h3>📍 Find Our Store</h3>
+          <iframe
+            title="Store Location"
+            src={`https://maps.google.com/maps?q=${SHOP_LAT},${SHOP_LNG}&z=15&output=embed`}
+            allowFullScreen
+          />
+          <button className="directions-btn" onClick={handleLocation}>
+            Get Directions →
+          </button>
         </div>
+
       </div>
     </div>
   );

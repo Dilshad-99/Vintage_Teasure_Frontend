@@ -29,15 +29,11 @@ function calculateAverageRating(reviews) {
 // ───────────────────────────────────────────────────────
 export const SaveProduct = async (req, res) => {
     try {
-        // Step 1: Generate a new unique product ID
         const newProductId = await generateProductId();
 
-        // Step 2: Build a unique filename for the uploaded image
-        //         format: <random>_<timestamp>_<originalname>
         const uploadedImage   = req.files.producticon;
         const uniqueImageName = `${rs.generate(10)}_${Date.now()}_${uploadedImage.name}`;
 
-        // Step 3: Resolve the upload folder path
         const currentDir   = url.fileURLToPath(new URL('.', import.meta.url));
         const uploadFolder = path.join(
             currentDir,
@@ -45,16 +41,20 @@ export const SaveProduct = async (req, res) => {
             uniqueImageName
         );
 
-        // Step 4: Build the product object to save in DB
+        // ✅ reviews parse karo
+        const parsedReviews = req.body.reviews
+            ? [JSON.parse(req.body.reviews)]
+            : [];
+
         const newProduct = {
             ...req.body,
             _id:           newProductId,
             producticonnm: uniqueImageName,
             addedby:       req.body.addedby || null,
             role:          req.body.role    || 'user',
+            reviews:       parsedReviews, // ✅ array format
         };
 
-        // Step 5: Save to DB first, then move the image to its folder
         await ProductModel.create(newProduct);
         await uploadedImage.mv(uploadFolder);
 
@@ -65,7 +65,6 @@ export const SaveProduct = async (req, res) => {
         res.status(500).json({ status: false, message: err.message });
     }
 };
-
 // ───────────────────────────────────────────────────────
 //  GET /fetch  →  Get products (with optional filters)
 // ───────────────────────────────────────────────────────

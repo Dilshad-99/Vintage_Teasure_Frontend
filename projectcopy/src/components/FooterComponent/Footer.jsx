@@ -1,7 +1,16 @@
 import './Footer.css';
 import { Link } from 'react-router-dom';
 
+const WHATSAPP_NUMBER = "+91 7898561191"; // apna number daal
+const WHATSAPP_MESSAGE = "Hello! I need help with my order.";
+
 function Footer() {
+
+  const handleWhatsApp = () => {
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
+    window.open(url, '_blank');
+  };
+
   return (
     <footer className="footer">
       <div className="footer-inner">
@@ -12,6 +21,15 @@ function Footer() {
             relationships in this community since 2010. Thanks for stopping by — 
             we hope to see you in person soon.
           </p>
+          {/* ✅ WhatsApp Button */}
+          <button className="whatsapp-btn" onClick={handleWhatsApp}>
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+              alt="WhatsApp"
+              width="18"
+            />
+            Chat on WhatsApp
+          </button>
         </div>
 
         <div className="footer-col">
@@ -39,13 +57,13 @@ function Footer() {
           <ul className="contact-info">
             <li>&#128205; 123 Main Street, City</li>
             <li>&#128222; (555) 123-4567</li>
-            <li>&#128231; hello@pawnstar.com</li>
+            <li>&#128231; hello@vintageteasure.com</li>
           </ul>
         </div>
       </div>
 
       <div className="footer-bottom">
-        <p>Made with &#128153; in our little corner of the world. &copy; 2026 Pawn Star.</p>
+        <p>Made with &#128153; in our little corner of the world. &copy; 2026 Vintage Teasure.</p>
       </div>
     </footer>
   );

@@ -86,7 +86,7 @@ function AddProduct() {
     fileRef.current.value = '';
   };
 
-  const handleSubmit = (e) => {
+ const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!catnm || !subcatnm || !title || !imageFile || !price) {
@@ -101,10 +101,20 @@ function AddProduct() {
     formdata.append('subcatnm', subcatnm);
     formdata.append('description', description);
     formdata.append('ratings', rating);
-    formdata.append('reviews', reviews);
-    formdata.append('producticon', imageFile);
     formdata.append('addedby', userEmail);
     formdata.append('role', userRole);
+    formdata.append('producticon', imageFile);
+
+    // ✅ reviews ko object format mein bhejo
+    if (reviews) {
+      const reviewObj = JSON.stringify({
+        reviewer: userEmail,
+        comment: reviews,
+        rating: rating ? Number(rating) : 0,
+        info: Date()
+      });
+      formdata.append('reviews', reviewObj);
+    }
 
     setLoading(true);
 
@@ -121,72 +131,98 @@ function AddProduct() {
       })
       .finally(() => setLoading(false));
   };
-
-  return (
+return (
     <div className="page-section add-product-page">
-      <h2>Add Product</h2>
 
-      <form onSubmit={handleSubmit}>
+      <div className="add-product-header">
+        <span className="add-product-icon">📦</span>
+        <h2>Add Product</h2>
+      </div>
 
-        <input
-          placeholder="Title"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-        />
+      <form className="add-product-form" onSubmit={handleSubmit}>
 
-        <input
-          placeholder="Price"
-          value={price}
-          onChange={e => setPrice(e.target.value)}
-        />
+        <div className="form-group">
+          <label>Title *</label>
+          <input
+            type="text"
+            placeholder="Product title"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+          />
+        </div>
 
-        <select value={catnm} onChange={e => setCatnm(e.target.value)}>
-          <option value="">Category</option>
-          {catList.map(c => (
-            <option key={c._id} value={c.catnm}>
-              {c.catnm}
-            </option>
-          ))}
-        </select>
+        <div className="form-group">
+          <label>Price *</label>
+          <input
+            type="text"
+            placeholder="e.g. 499"
+            value={price}
+            onChange={e => setPrice(e.target.value)}
+          />
+        </div>
 
-        <select value={subcatnm} onChange={e => setSubcatnm(e.target.value)}>
-          <option value="">Subcategory</option>
-          {subcatList.map(s => (
-            <option key={s._id} value={s.subcatnm}>
-              {s.subcatnm}
-            </option>
-          ))}
-        </select>
+        <div className="form-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+          <div className="form-group">
+            <label>Category *</label>
+            <select value={catnm} onChange={e => setCatnm(e.target.value)}>
+              <option value="">Select Category</option>
+              {catList.map(c => (
+                <option key={c._id} value={c.catnm}>{c.catnm}</option>
+              ))}
+            </select>
+          </div>
 
-        <input
-          type="file"
-          ref={fileRef}
-          onChange={e => setImageFile(e.target.files[0])}
-        />
+          <div className="form-group">
+            <label>Subcategory *</label>
+            <select value={subcatnm} onChange={e => setSubcatnm(e.target.value)}>
+              <option value="">Select Subcategory</option>
+              {subcatList.map(s => (
+                <option key={s._id} value={s.subcatnm}>{s.subcatnm}</option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-        {/* ✅ Rating input added */}
-        <input
-          type="number"
-          min="0"
-          max="5"
-          placeholder="Rating (0–5)"
-          value={rating}
-          onChange={handleRating}
-        />
+        <div className="form-group">
+          <label>Product Image *</label>
+          <input
+            type="file"
+            ref={fileRef}
+            onChange={e => setImageFile(e.target.files[0])}
+          />
+        </div>
 
-        <textarea
-          placeholder="Description"
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-        />
+        <div className="form-group">
+          <label>Rating (0–5)</label>
+          <input
+            type="number"
+            min="0"
+            max="5"
+            placeholder="0"
+            value={rating}
+            onChange={handleRating}
+          />
+        </div>
 
-        <textarea
-          placeholder="Reviews"
-          value={reviews}
-          onChange={e => setReviews(e.target.value)}
-        />
+        <div className="form-group">
+          <label>Description</label>
+          <textarea
+            placeholder="Product description..."
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+          />
+        </div>
 
-        <button disabled={loading}>
+        <div className="form-group">
+          <label>Reviews</label>
+          <textarea
+            placeholder="Write a review..."
+            value={reviews}
+            onChange={e => setReviews(e.target.value)}
+          />
+        </div>
+
+        <button className="add-product-btn" disabled={loading}>
           {loading ? 'Saving...' : 'Add Product'}
         </button>
 

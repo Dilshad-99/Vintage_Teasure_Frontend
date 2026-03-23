@@ -20,7 +20,7 @@ function Header() {
     <Link to={to} className="header-brand">
       <span className="brand-icon">♦</span>
       <div className="brand-text">
-        <h1>Pawn Star</h1>
+        <h1>Vintage Teasure</h1>
         <span className="brand-tagline">Where Every Item Tells a Story</span>
       </div>
     </Link>

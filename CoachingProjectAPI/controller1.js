@@ -1,16 +1,11 @@
-// productController.js
-// import './connection1.js'
-
 import "./32_connection_express.js";
 import Category from './model1.js';
 
-//Path's ->
 import url from 'url';
 import path from 'path';
 
 export const savecategory = async (req, res) => {
   try {
-    // Check if files exist
     if (!req.files || !req.files.caticon) {
       return res.status(400).json({ "status": false, "message": "No file uploaded" });
     }
@@ -39,11 +34,7 @@ export const savecategory = async (req, res) => {
 export const fetchcategory = async (req, res) => {
   try {
     const categoryList = await Category.find();
-    if (categoryList.length > 0) {
-      res.status(200).json({ "status": true, "userDetails": categoryList });
-    } else {
-      res.status(404).json({ status: false, info: [] });
-    }
+    res.status(200).json({ "status": true, "userDetails": categoryList }); // ✅ fixed
   } catch (error) {
     console.error(error);
     res.status(500).json({ status: "server error" });
