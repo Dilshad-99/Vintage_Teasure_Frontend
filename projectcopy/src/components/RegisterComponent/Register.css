@@ -1,35 +1,28 @@
-/* ===== Register Page ===== */
+.register-page { max-width: 580px; margin: 0 auto; }
 
-.register-page {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-/* ===== Form Rows ===== */
 .auth-form .form-row {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 4px;
-  margin-bottom: 4px;
+  gap: 2px;
+  margin-bottom: 2px;
 }
 
 .auth-form .form-row.two-col {
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 16px;
 }
 
-/* ===== Gender Radio ===== */
 .gender-group {
   display: flex;
   align-items: center;
-  gap: 30px;
-  padding: 10px 0;
+  gap: 24px;
+  padding: 8px 0;
 }
 
 .gender-option {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
   color: var(--text);
   font-size: 14px;
@@ -39,15 +32,13 @@
   transition: var(--transition);
 }
 
-.gender-option:hover {
-  color: var(--gold);
-}
+.gender-option:hover { color: var(--gold); }
 
 .auth-form input[type="radio"] {
   appearance: none;
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--border);
+  width: 17px;
+  height: 17px;
+  border: 1.5px solid var(--border-gold);
   border-radius: 50%;
   background: var(--bg-input);
   cursor: pointer;
@@ -56,9 +47,7 @@
   flex-shrink: 0;
 }
 
-.auth-form input[type="radio"]:checked {
-  border-color: var(--gold);
-}
+.auth-form input[type="radio"]:checked { border-color: var(--gold); }
 
 .auth-form input[type="radio"]:checked::after {
   content: '';
@@ -66,37 +55,13 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   background: var(--gold);
   border-radius: 50%;
 }
 
-/* ===== Disabled States ===== */
-.btn-full:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.auth-form input:disabled,
-.auth-form textarea:disabled,
-.auth-form select:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* ===== Responsive ===== */
 @media (max-width: 768px) {
-  .register-page {
-    max-width: 100%;
-  }
-
-  .auth-form .form-row.two-col {
-    grid-template-columns: 1fr;
-  }
-
-  .gender-group {
-    gap: 20px;
-  }
+  .register-page { max-width: 100%; }
+  .auth-form .form-row.two-col { grid-template-columns: 1fr; }
 }

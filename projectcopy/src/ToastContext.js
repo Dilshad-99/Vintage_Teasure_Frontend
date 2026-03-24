@@ -1,29 +1,43 @@
 import { createContext, useContext, useState, useCallback } from 'react';
-import Toast from './components/ToastComponent/Toast';
 
 const ToastContext = createContext();
 
 export function ToastProvider({ children }) {
-  const [toast, setToast] = useState({ message: "", type: "success" });
+  const [toasts, setToasts] = useState([]);
 
-  const showToast = useCallback((message, type = "success") => {
-    setToast({ message, type });
+  const showToast = useCallback((message, type = 'info') => {
+    const id = Date.now() + Math.random();
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 3500);
   }, []);
 
-  const hideToast = useCallback(() => {
-    setToast({ message: "", type: "success" });
+  const removeToast = useCallback((id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        onClose={hideToast}
-      />
+      <div className="toast-container">
+        {toasts.map(t => (
+          <div key={t.id} className={`toast toast-${t.type} toast-animate`}>
+            <span className="toast-icon">
+              {t.type === 'success' && '✅'}
+              {t.type === 'error'   && '❌'}
+              {t.type === 'warning' && '⚠️'}
+              {t.type === 'info'    && 'ℹ️'}
+            </span>
+            <span className="toast-message">{t.message}</span>
+            <button className="toast-close" onClick={() => removeToast(t.id)}>×</button>
+          </div>
+        ))}
+      </div>
     </ToastContext.Provider>
   );
 }
 
-export const useToast = () => useContext(ToastContext);
+export function useToast() {
+  return useContext(ToastContext);
+}

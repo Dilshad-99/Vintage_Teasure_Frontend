@@ -1,5 +1,5 @@
 import './ChangePassword.css';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { __userapiurl } from '../../API_URL';
 import { Link } from 'react-router-dom';
@@ -7,28 +7,10 @@ import { useToast } from '../../ToastContext';
 
 function ChangePassword() {
   const { showToast } = useToast();
-  const [oldPassword, setOldPassword] = useState('');
-  const [password, setPassword] = useState('');
+  const [oldPassword,     setOldPassword]     = useState('');
+  const [password,        setPassword]        = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [userEmail, setUserEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const storedEmail = localStorage.getItem("email");
-    axios.get(__userapiurl + "fetch", {
-      params: { "email": storedEmail }
-    })
-      .then((response) => {
-        const user = response.data.info || response.data.userDetails || response.data[0];
-        if (user) {
-          setUserEmail(user.email);
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        showToast("Error fetching user data.", "error");
-      });
-  }, [showToast]);
+  const [loading,         setLoading]         = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -48,34 +30,34 @@ function ChangePassword() {
       return;
     }
 
+    if (password === oldPassword) {
+      showToast("New password cannot be same as old password.", "warning");
+      return;
+    }
+
     setLoading(true);
 
-    axios.post(__userapiurl + "login", { email: userEmail, password: oldPassword })
-      .then(() => {
-        const data = {
-          "condition_obj": { "email": userEmail },
-          "content_obj": { "password": password }
-        };
+    const email = localStorage.getItem("email");
 
-        axios.patch(__userapiurl + "update", data)
-          .then((response) => {
-            if (response.data.status === "OK") {
-              showToast("Password changed successfully!", "success");
-              setOldPassword('');
-              setPassword('');
-              setConfirmPassword('');
-            }
-          })
-          .catch((error) => {
-            console.error(error);
-            showToast("Error updating password. Please try again.", "error");
-          })
-          .finally(() => setLoading(false));
+    // ✅ Single dedicated API call — bcrypt handled on backend
+    axios.post(__userapiurl + "changepassword", {
+      email,
+      oldPassword,
+      newPassword: password
+    })
+      .then((response) => {
+        if (response.data.status === true) {
+          showToast("Password changed successfully! 🔒", "success");
+          setOldPassword('');
+          setPassword('');
+          setConfirmPassword('');
+        }
       })
-      .catch(() => {
-        showToast("Current password is incorrect!", "error");
-        setLoading(false);
-      });
+      .catch((error) => {
+        const msg = error.response?.data?.message || "Error updating password.";
+        showToast(msg, "error");
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -101,7 +83,7 @@ function ChangePassword() {
           <label>New Password</label>
           <input
             type="password"
-            placeholder="Enter new password"
+            placeholder="Enter new password (min 6 chars)"
             onChange={e => setPassword(e.target.value)}
             value={password}
           />

@@ -1,44 +1,37 @@
 import dotenv from 'dotenv';
-dotenv.config(); // yahan bhi zaruri hai
+dotenv.config();
 
-import express from "express";
-import OpenAI from "openai";
+import express from 'express';
+import Groq from 'groq-sdk';
 
 const router = express.Router();
 
-const apiKey = process.env.OPENAI_KEY;
+const apiKey = process.env.GROQ_KEY;
 
-if (!apiKey) {
-  console.warn("⚠️ OPENAI_KEY is missing in environment variables");
-}
+if (!apiKey)
+  console.warn("⚠️ GROQ_KEY is missing in environment variables");
 
-const openai = new OpenAI({
-  apiKey: apiKey || "dummy-key"
-});
+const groq = new Groq({ apiKey });
 
 router.post("/aiChat", async (req, res) => {
   try {
     const { message } = req.body;
 
-    if (!message) {
+    if (!message)
       return res.status(400).json({ error: "Message is required" });
-    }
 
-    if (!process.env.OPENAI_KEY) {
-      return res.status(500).json({ error: "OpenAI API key not configured" });
-    }
+    if (!process.env.GROQ_KEY)
+      return res.status(500).json({ error: "Groq API key not configured" });
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // ✅ "gpt-5-nano" exist nahi karta, yeh fix kiya
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
       messages: [
         { role: "system", content: "You are a helpful AI assistant." },
         { role: "user", content: message }
       ]
     });
 
-    res.json({
-      reply: completion.choices[0].message.content
-    });
+    res.json({ reply: completion.choices[0].message.content });
 
   } catch (error) {
     console.error("AI ERROR:", error);

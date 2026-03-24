@@ -7,10 +7,10 @@ import { useToast } from '../../ToastContext';
 function Charity() {
   const { showToast } = useToast();
   const [selectedAmount, setSelectedAmount] = useState(0);
-  const [customAmount, setCustomAmount] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [customAmount,   setCustomAmount]   = useState("");
+  const [loading,        setLoading]        = useState(false);
 
-  const amounts = [100, 200, 500, 100000];
+  const amounts = [100, 200, 500, 1000];
 
   useEffect(() => {
     if (!window.Razorpay) {
@@ -23,13 +23,13 @@ function Charity() {
 
   const handlePresetAmount = (amt) => {
     setSelectedAmount(amt);
-    setCustomAmount(""); // clear custom input
+    setCustomAmount("");
   };
 
   const handleCustomAmount = (e) => {
     const val = e.target.value;
     setCustomAmount(val);
-    setSelectedAmount(Number(val) || 0); // deselect preset
+    setSelectedAmount(Number(val) || 0);
   };
 
   const finalAmount = customAmount ? Number(customAmount) : selectedAmount;
@@ -45,7 +45,7 @@ function Charity() {
       return;
     }
 
-    const name = localStorage.getItem('name') || 'Anonymous';
+    const name  = localStorage.getItem('name')  || 'Anonymous';
     const email = localStorage.getItem('email');
 
     if (!email) {
@@ -63,19 +63,31 @@ function Charity() {
       });
 
       const rzp = new window.Razorpay({
-        key: data.key_id,
-        amount: data.order.amount,
-        currency: "INR",
-        name: "Coaching Project",
-        description: "Support / Donation",
-        order_id: data.order.id,
-        prefill: { name, email },
-        theme: { color: "#C9A84C" },
-        handler: () => {
-          showToast("Payment Successful! 🎉", "success");
+        key:         data.key_id,
+        amount:      data.order.amount,
+        currency:    "INR",
+        name:        "Vintage Treasure",
+        description: "Support / Donation 🤝",
+        order_id:    data.order.id,
+        prefill:     { name, email },
+        theme:       { color: "#8B4513" },
+
+        handler: async (response) => {
+          // ✅ Verify payment on backend
+          try {
+            await axios.post('http://localhost:3001/payment/verifyPayment', {
+              razorpay_order_id:   response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+            });
+            showToast("Payment Successful! 🎉 Thank you for your donation!", "success");
+          } catch (err) {
+            showToast("Payment done but verification failed.", "warning");
+          }
           setSelectedAmount(0);
           setCustomAmount("");
+          setLoading(false);
         },
+
         modal: {
           ondismiss: () => {
             showToast("Payment cancelled.", "warning");
@@ -88,7 +100,6 @@ function Charity() {
 
     } catch (err) {
       showToast(err.response?.data?.error || "Payment failed. Try again.", "error");
-    } finally {
       setLoading(false);
     }
   };
@@ -98,9 +109,8 @@ function Charity() {
       <div className="donation-card">
         <span className="donation-icon">🤝</span>
         <h1>Support / Donation</h1>
-        <p>Select or enter an amount to donate:</p>
+        <p>Your contribution helps us serve the community better.</p>
 
-        {/* Preset amounts */}
         <div className="amount-boxes">
           {amounts.map((amt) => (
             <div
@@ -113,7 +123,6 @@ function Charity() {
           ))}
         </div>
 
-        {/* Custom amount input */}
         <div className="custom-amount-wrapper">
           <label className="custom-amount-label">Or enter custom amount:</label>
           <div className="custom-amount-input-wrapper">
@@ -129,7 +138,6 @@ function Charity() {
           </div>
         </div>
 
-        {/* Selected amount display */}
         {finalAmount > 0 && (
           <p className="selected-amount">
             You are donating: <span>₹{finalAmount}</span>
@@ -141,10 +149,10 @@ function Charity() {
           className="donate-btn"
           disabled={loading || finalAmount <= 0}
         >
-          {loading ? 'Processing...' : `Pay ₹${finalAmount || 0}`}
+          {loading ? 'Processing...' : `Donate ₹${finalAmount || 0} 💛`}
         </button>
       </div>
-    </div> 
+    </div>
   );
 }
 

@@ -4,25 +4,25 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { __userapiurl } from '../../API_URL';
 import { useToast } from '../../ToastContext';
+import { notifyAuthChange } from '../../utils/authEvents';
 
 function makeCaptcha() {
   const a = Math.floor(Math.random() * 10) + 1;
   const b = Math.floor(Math.random() * 10) + 1;
-  return { a, b, answer : a + b };
+  return { a, b, answer: a + b };
 }
 
 function Login() {
-
   const { showToast } = useToast();
   const navigate = useNavigate();
 
-  const [ email, setEmail ]           = useState('');
-  const [ password, setPassword ]     = useState('');
-  const [ showPass, setShowPass ]     = useState(false);
-  const [ loading, setLoading ]       = useState(false);
-  const [ captcha, setCaptcha ]       = useState(makeCaptcha());
-  const [ captchaVal, setCaptchaVal ] = useState('');
-  const [ captchaErr, setCaptchaErr ] = useState(false);
+  const [email,      setEmail]      = useState('');
+  const [password,   setPassword]   = useState('');
+  const [showPass,   setShowPass]   = useState(false);
+  const [loading,    setLoading]    = useState(false);
+  const [captcha,    setCaptcha]    = useState(makeCaptcha());
+  const [captchaVal, setCaptchaVal] = useState('');
+  const [captchaErr, setCaptchaErr] = useState(false);
 
   const resetCaptcha = useCallback(() => {
     setCaptcha(makeCaptcha());
@@ -65,6 +65,7 @@ function Login() {
         localStorage.setItem('gender',  user.gender);
         localStorage.setItem('info',    user.info);
         localStorage.setItem('role',    user.role);
+        notifyAuthChange();                                        // ✅ sahi jagah
         showToast(`Welcome back, ${user.name}! 👋`, 'success');
         navigate(user.role === 'admin' ? '/admin' : '/user');
       })
@@ -87,10 +88,11 @@ function Login() {
       </div>
 
       <form className="auth-form" onSubmit={handleSubmit}>
-
         <div className="form-group">
           <label>Email</label>
-          <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Enter your email" />
+          <input type="email" value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="Enter your email" />
         </div>
 
         <div className="form-group">
@@ -102,14 +104,17 @@ function Login() {
               onChange={e => setPassword(e.target.value)}
               placeholder="Enter your password"
             />
-            <button type="button" className="password-toggle" onClick={() => setShowPass(p => !p)}>
+            <button type="button" className="password-toggle"
+              onClick={() => setShowPass(p => !p)}>
               {showPass ? '🙈' : '👁️'}
             </button>
           </div>
         </div>
 
         <div className="form-extras">
-          <label className="remember-me"><input type="checkbox" /> Remember me</label>
+          <label className="remember-me">
+            <input type="checkbox" /> Remember me
+          </label>
           <Link to="/ForgetPassword" className="forgot-link">Forgot password?</Link>
         </div>
 
@@ -133,8 +138,9 @@ function Login() {
           {loading ? 'Logging in...' : 'Let Me In 🔒'}
         </button>
 
-        <p className="auth-switch">New around here? <Link to="/register">Come join us</Link></p>
-
+        <p className="auth-switch">
+          New around here? <Link to="/register">Come join us</Link>
+        </p>
       </form>
     </div>
   );

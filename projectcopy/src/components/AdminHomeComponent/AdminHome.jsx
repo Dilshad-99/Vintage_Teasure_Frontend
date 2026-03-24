@@ -1,32 +1,61 @@
 import './AdminHome.css';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { __userapiurl } from '../../API_URL';
+import api from '../../api';                          // ✅ api instance
+
+function useCountUp(target, duration = 1000) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (target === 0) return;
+    let start = 0;
+    const step = Math.ceil(target / (duration / 30));
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= target) { setCount(target); clearInterval(timer); }
+      else setCount(start);
+    }, 30);
+    return () => clearInterval(timer);
+  }, [target, duration]);
+  return count;
+}
+
+function StatCard({ icon, label, value, color, loading }) {
+  const animated = useCountUp(value);
+  return (
+    <div className="stat-card">
+      <span className="stat-icon">{icon}</span>
+      <h4>{label}</h4>
+      {loading
+        ? <div className="stat-skeleton" />
+        : <p className="stat-count" style={color ? { color } : {}}>{animated}</p>
+      }
+    </div>
+  );
+}
 
 function AdminHome() {
-
-  const [ userCount, setUserCount ]         = useState(0);
-  const [ activeCount, setActiveCount ]     = useState(0);
-  const [ inactiveCount, setInactiveCount ] = useState(0);
+  const [users,   setUsers]   = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(__userapiurl + "fetch", { params : { "role" : "user" } })
-      .then((response) => {
-        const users = response.data.userDetails || [];
-        setUserCount(users.length);
-        setActiveCount(users.filter(u => u.status === 1).length);
-        setInactiveCount(users.filter(u => u.status === 0).length);
-      })
-      .catch((error) => console.error(error));
+    api.get('/user/fetch', { params: { role: 'user' } })   // ✅ token auto-attached
+      .then(res => setUsers(res.data.userDetails || []))
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
   }, []);
 
+  const total    = users.length;
+  const active   = users.filter(u => u.status === 1).length;
+  const inactive = users.filter(u => u.status === 0).length;
+
   const adminLinks = [
-    { to : "/manageUser",     icon : "👥", title : "Manage Users",   desc : "View, activate or delete users" },
-    { to : "/addcategory",    icon : "📁", title : "Add Category",    desc : "Create new product categories" },
-    { to : "/addsubcategory", icon : "📂", title : "Add SubCategory", desc : "Add subcategories under existing categories" },
-    { to : "/viewcategory",   icon : "👁️", title : "View Products",   desc : "Browse all categories and products" },
-    { to : "/charity",        icon : "🤝", title : "Charity",         desc : "View and manage donations" },
+    { to: "/manageUser",     icon: "👥", title: "Manage Users",   desc: "View, activate or delete users" },
+    { to: "/addcategory",    icon: "📁", title: "Add Category",    desc: "Create new product categories" },
+    { to: "/addsubcategory", icon: "📂", title: "Add SubCategory", desc: "Add subcategories to categories" },
+    { to: "/viewcategory",   icon: "👁️", title: "View Products",   desc: "Browse all categories and products" },
+    { to: "/charity",        icon: "🤝", title: "Charity",         desc: "View and manage donations" },
+    { to: "/editprofile",    icon: "✏️", title: "Edit Profile",    desc: "Update your admin information" },
+    { to: "/changepassword", icon: "🔒", title: "Change Password", desc: "Keep your account secure" },
   ];
 
   return (
@@ -38,31 +67,19 @@ function AdminHome() {
       </div>
 
       <div className="admin-stats">
-        <div className="stat-card">
-          <span className="stat-icon">👥</span>
-          <h4>Total Users</h4>
-          <p className="stat-count">{userCount}</p>
-        </div>
-        <div className="stat-card">
-          <span className="stat-icon">✅</span>
-          <h4>Active Users</h4>
-          <p className="stat-count active">{activeCount}</p>
-        </div>
-        <div className="stat-card">
-          <span className="stat-icon">❌</span>
-          <h4>Inactive Users</h4>
-          <p className="stat-count inactive">{inactiveCount}</p>
-        </div>
+        <StatCard icon="👥" label="Total Users"    value={total}    loading={loading} />
+        <StatCard icon="✅" label="Active Users"   value={active}   loading={loading} color="var(--color-success, green)" />
+        <StatCard icon="❌" label="Inactive Users" value={inactive} loading={loading} color="var(--color-danger, red)" />
         <div className="stat-card">
           <span className="stat-icon">💰</span>
           <h4>Payments</h4>
-          <p>View all transactions</p>
+          <p>View transactions</p>
         </div>
       </div>
 
       <h3 className="admin-section-title">Quick Actions</h3>
       <div className="admin-links-grid">
-        {adminLinks.map((link) => (
+        {adminLinks.map(link => (
           <Link to={link.to} className="admin-link-card" key={link.to}>
             <span className="admin-link-icon">{link.icon}</span>
             <div className="admin-link-info">

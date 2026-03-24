@@ -14,6 +14,12 @@
   font-size: 48px;
   display: block;
   margin-bottom: 15px;
+  animation: float 3s ease-in-out infinite; /* ✅ floating icon */
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
 }
 
 .admin-home-header h2 {
@@ -55,12 +61,39 @@
   padding: 20px;
   text-align: center;
   transition: var(--transition);
+  position: relative;
+  overflow: hidden;
 }
 
 .stat-card:hover {
   border-color: var(--border-gold);
   box-shadow: var(--shadow-gold);
   transform: translateY(-3px);
+}
+
+/* ✅ Shimmer loading */
+.stat-loading {
+  pointer-events: none;
+}
+
+.stat-shimmer {
+  height: 24px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--border) 25%,
+    var(--bg-card) 50%,
+    var(--border) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  margin: 8px auto 0;
+  width: 60px;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .stat-icon {
@@ -79,6 +112,22 @@
 .stat-card p {
   font-size: 12px;
   color: var(--text-muted);
+}
+
+/* ✅ Animated count colors */
+.stat-count {
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  color: var(--gold) !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.stat-count.active {
+  color: #2ecc71 !important;
+}
+
+.stat-count.inactive {
+  color: #e74c3c !important;
 }
 
 /* ===== Quick Actions ===== */
@@ -116,9 +165,20 @@
   transform: translateY(-3px);
 }
 
+/* ✅ Icon bounce on hover */
+.admin-link-card:hover .admin-link-icon {
+  animation: bounce 0.4s ease;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
 .admin-link-icon {
   font-size: 32px;
   flex-shrink: 0;
+  transition: var(--transition);
 }
 
 .admin-link-info {

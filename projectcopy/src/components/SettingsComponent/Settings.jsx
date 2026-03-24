@@ -6,6 +6,12 @@ function Settings() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
+  useEffect(() => {
+  const onKey = (e) => { if (e.key === 'Escape') setIsOpen(false); };
+  document.addEventListener('keydown', onKey);
+  return () => document.removeEventListener('keydown', onKey);
+}, []);
+
   // close when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {

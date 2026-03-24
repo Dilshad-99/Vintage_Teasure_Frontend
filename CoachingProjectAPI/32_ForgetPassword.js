@@ -1,28 +1,81 @@
+// import nodemailer from 'nodemailer';
+
+// const ForgetPassword=(req,res)=>{
+//  const email=req.body.email;
+//  let transporter = nodemailer.createTransport({
+//    service: 'gmail',
+//    auth: {
+//      user: 'dilshad2307j@gmail.com',
+//      pass: process.env.PASS
+//    }
+//  });
+
+//  let mailOptions = {
+//    from: 'dilshad2307j@gmail.com',
+//    to: email,
+//    subject: 'Link For ForgetPassword PawnShop',
+//    html: "<h1>Welcome to pawnshop</h1><h2>your link to reset password is attached below</h2><h2>Click on the link below to reset password</h2><a href='http://localhost:3000/resetpassword/"+email+"'>Click to reset password</a>"
+//  };
+
+// transporter.sendMail(mailOptions, function(error, userDetails){
+//   if (error) {
+//     console.log(error);
+//   } else {
+//     console.log('Email sent: ' + userDetails.response);
+//   }
+// });
+// }
+// export default ForgetPassword;
+
+
 import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const ForgetPassword=(req,res)=>{
- const email=req.body.email;
- let transporter = nodemailer.createTransport({
-   service: 'gmail',
-   auth: {
-     user: 'dilshad2307j@gmail.com',
-     pass: process.env.PASS
-   }
- });
+const ForgetPassword = (req, res) => {
+  const email = req.body.email;
 
- let mailOptions = {
-   from: 'dilshad2307j@gmail.com',
-   to: email,
-   subject: 'Link For ForgetPassword PawnShop',
-   html: "<h1>Welcome to pawnshop</h1><h2>your link to reset password is attached below</h2><h2>Click on the link below to reset password</h2><a href='http://localhost:3000/resetpassword/"+email+"'>Click to reset password</a>"
- };
+  let transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'dilshad2307j@gmail.com',
+      pass: process.env.NODEPASS   // ✅ Fixed: was PASS, now same as nodeMailer
+    }
+  });
 
-transporter.sendMail(mailOptions, function(error, userDetails){
-  if (error) {
-    console.log(error);
-  } else {
-    console.log('Email sent: ' + userDetails.response);
-  }
-});
-}
+  let mailOptions = {
+    from: '"Vintage Treasure" <dilshad2307j@gmail.com>',
+    to: email,
+    subject: 'Reset Your Password — Vintage Treasure',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+        <div style="background: #8B4513; padding: 20px; text-align: center;">
+          <h1 style="color: white; margin: 0;">🏺 Vintage Treasure</h1>
+        </div>
+        <div style="padding: 30px;">
+          <h2>Password Reset Request 🔑</h2>
+          <p>Click the button below to reset your password:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="http://localhost:3000/resetpassword/${email}"
+               style="background: #8B4513; color: white; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-size: 16px;">
+              Reset Password
+            </a>
+          </div>
+          <p style="color: #888; font-size: 13px;">If you didn't request this, ignore this email.</p>
+        </div>
+      </div>
+    `
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log(error);
+      res.status(500).json({ "status": false });
+    } else {
+      console.log('Email sent: ' + info.response);
+      res.status(200).json({ "status": true });
+    }
+  });
+};
+
 export default ForgetPassword;
