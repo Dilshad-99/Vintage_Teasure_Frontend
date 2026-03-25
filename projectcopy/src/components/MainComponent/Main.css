@@ -338,3 +338,54 @@
   .widget-section { grid-template-columns: 1fr; }
   .features-section, .testimonials-section { padding: 24px 16px; }
 }
+.hero-banner {
+  background-color: var(--bg-card); /* fallback agar image load na ho */
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 56px 48px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dark overlay — text readable rahe */
+.hero-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(10, 10, 15, 0.88) 0%,
+    rgba(10, 10, 15, 0.65) 100%
+  );
+  z-index: 0;
+  border-radius: var(--radius);
+}
+
+.hero-banner::before {
+  z-index: 1; /* gold glow effect upar rahe */
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2; /* overlay ke upar */
+}
+
+.hero-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(10, 10, 15, 0.88) 0%,
+    rgba(10, 10, 15, 0.65) 100%
+  );
+  z-index: 0;
+  border-radius: var(--radius);
+}
+
+.recent-item-icon {
+  width: 40px;
+  height: 40px;
+  /* ... */
+}

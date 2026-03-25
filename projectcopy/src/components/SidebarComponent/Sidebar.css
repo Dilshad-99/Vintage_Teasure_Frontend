@@ -1,77 +1,57 @@
-/* ===== Sidebar ===== */
-
 .sidebar {
-  width: 300px;
+  width: 280px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .sidebar-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 24px;
-  box-shadow: var(--shadow);
+  padding: 22px;
   transition: var(--transition);
 }
 
+.sidebar-card:hover { border-color: var(--border-gold); }
+
 .sidebar-title {
   font-family: 'Playfair Display', serif;
-  font-size: 17px;
+  font-size: 15px;
   color: var(--white);
-  margin-bottom: 18px;
-  padding-bottom: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--border);
 }
 
-/* ===== Store Hours ===== */
-.hours-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
+/* Hours */
+.hours-list { list-style: none; padding: 0; margin: 0; }
 
 .hours-list li {
   display: flex;
   justify-content: space-between;
-  padding: 10px 0;
+  padding: 9px 0;
   font-size: 13px;
   border-bottom: 1px solid var(--border);
 }
 
-.hours-list li:last-child {
-  border-bottom: none;
-}
+.hours-list li:last-child { border-bottom: none; }
+.hours-list li span:first-child { font-weight: 500; color: var(--text); }
+.hours-list li span:last-child  { color: var(--text-muted); }
 
-.hours-list li span:first-child {
-  font-weight: 600;
-  color: var(--text);
-}
-
-.hours-list li span:last-child {
-  color: var(--text-muted);
-}
-
-/* ===== Categories ===== */
-.category-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
+/* Categories */
+.category-list { list-style: none; padding: 0; margin: 0; }
 
 .category-list li {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 9px 0;
+  padding: 8px 0;
   border-bottom: 1px solid var(--border);
 }
 
-.category-list li:last-child {
-  border-bottom: none;
-}
+.category-list li:last-child { border-bottom: none; }
 
 .category-list li a {
   color: var(--text-muted);
@@ -80,23 +60,21 @@
   transition: var(--transition);
 }
 
-.category-list li a:hover {
-  color: var(--gold);
-}
+.category-list li a:hover { color: var(--gold); }
 
 .badge {
   background: var(--bg-elevated);
   color: var(--text-dim);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 20px;
+  padding: 2px 8px;
+  border-radius: 99px;
   border: 1px solid var(--border);
 }
 
-/* ===== Tip Card ===== */
+/* Tip card */
 .tip-card {
-  background: linear-gradient(145deg, rgba(212, 175, 55, 0.06), rgba(212, 175, 55, 0.02));
+  background: var(--gold-glow);
   border: 1px solid var(--border-gold);
 }
 
@@ -104,28 +82,17 @@
   font-size: 13px;
   color: var(--text-muted);
   line-height: 1.7;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
-.btn-sm {
-  padding: 8px 20px;
-  font-size: 12px;
-  width: 100%;
-  text-align: center;
-}
-
-/* ===== Recent Items ===== */
-.recent-items {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+/* Recent items */
+.recent-items { display: flex; flex-direction: column; gap: 8px; }
 
 .recent-item {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px;
+  gap: 12px;
+  padding: 10px;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -135,52 +102,34 @@
 
 .recent-item:hover {
   border-color: var(--border-gold);
-  transform: translateX(4px);
-  box-shadow: var(--shadow-gold);
+  transform: translateX(3px);
 }
 
 .recent-item-icon {
-  font-size: 22px;
-  width: 44px;
-  height: 44px;
+  font-size: 20px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(212, 175, 55, 0.08);
-  border-radius: 10px;
+  background: var(--gold-glow);
+  border: 1px solid var(--border-gold);
+  border-radius: 8px;
   flex-shrink: 0;
 }
 
-.recent-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 2px;
-}
+.recent-name  { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.recent-price { font-size: 13px; font-weight: 700; color: var(--gold); }
+.recent-note  { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
 
-.recent-price {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--gold);
-}
-
-.recent-note {
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-top: 2px;
-}
-
-/* ===== Welcome Card ===== */
+/* Welcome card */
 .welcome-card {
-  background: linear-gradient(145deg, rgba(212, 175, 55, 0.08), rgba(212, 175, 55, 0.02));
+  background: var(--gold-glow);
   border: 1px solid var(--border-gold);
   text-align: center;
 }
 
-.welcome-emoji {
-  font-size: 28px;
-  margin-bottom: 8px;
-}
+.welcome-emoji { font-size: 24px; margin-bottom: 8px; display: block; }
 
 .welcome-text {
   font-size: 13px;
@@ -188,9 +137,21 @@
   line-height: 1.7;
 }
 
-/* ===== Responsive ===== */
-@media (max-width: 768px) {
-  .sidebar {
-    width: 100%;
-  }
+@media (max-width: 768px) { .sidebar { width: 100%; } }
+
+.recent-item-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--gold-glow);
+  border: 1px solid var(--border-gold);
+}
+
+.recent-item-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }

@@ -1,32 +1,22 @@
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { Outlet, Navigate, useLocation } from 'react-router-dom';
 
 function Auth() {
+  const { pathname } = useLocation();
+  const token = localStorage.getItem("token");
+  const role  = localStorage.getItem("role");
 
-  const navigate = useNavigate();
-  const location = useLocation();
+  const isLoggedIn = token && token !== "null" && token !== "undefined";
 
-  useEffect(() => {
-    const path  = location.pathname;
-    const token = localStorage.getItem("token");
-    const role  = localStorage.getItem("role");
+  const adminRoutes = ["/admin", "/manageUser", "/addcategory", "/addsubcategory", "/addreview"];
+  const userRoutes  = ["/user", "/addproduct"];
 
-    const isLoggedIn = token && token !== "null" && token !== "undefined";
+  const is = (list) => list.some(r => pathname.startsWith(r));
 
-    const adminRoutes  = [ "/admin", "/manageUser", "/addcategory", "/addsubcategory", "/addreview" ];
-    const userRoutes   = [ "/user", "/addproduct" ];
-    const publicRoutes = [ "/", "/about", "/contact", "/service", "/login", "/register", "/ForgetPassword", "/vemail" ];
+  if (!isLoggedIn)                        return <Navigate to="/login" />;
+  if (role === "admin" && is(userRoutes)) return <Navigate to="/admin" />;
+  if (role === "user"  && is(adminRoutes)) return <Navigate to="/user" />;
 
-    const is = (list) => list.some(r => path.startsWith(r));
-
-    if (is(publicRoutes)) return;
-    if (!isLoggedIn) { navigate("/login"); return; }
-    if (role === "admin" && is(userRoutes))  { navigate("/admin"); return; }
-    if (role === "user"  && is(adminRoutes)) { navigate("/user");  return; }
-
-  }, [location.pathname, navigate]);
-
-  return null;
+  return <Outlet />;
 }
 
 export default Auth;

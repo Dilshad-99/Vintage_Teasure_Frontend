@@ -14,80 +14,61 @@ function AddProduct() {
   const userEmail = localStorage.getItem('email');
   const userRole  = localStorage.getItem('role');
 
-  const [title, setTitle] = useState('');
-  const [price, setPrice] = useState('');
-  const [catnm, setCatnm] = useState('');
-  const [subcatnm, setSubcatnm] = useState('');
-  const [description, setDescription] = useState('');
-  const [rating, setRating] = useState('');
-  const [reviews, setReviews] = useState('');
-  const [imageFile, setImageFile] = useState(null);
-  const [catList, setCatList] = useState([]);
+  const [form, setForm] = useState({
+    title: '', price: '', catnm: '', subcatnm: '',
+    description: '', rating: '', reviews: ''
+  });
+  const [imageFile, setImageFile]   = useState(null);
+  const [catList, setCatList]       = useState([]);
   const [subcatList, setSubcatList] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading]       = useState(false);
 
-  // Redirect admin
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleRating = (e) => {
+    const v = e.target.value;
+    setForm(prev => ({ ...prev, rating: v === '' ? '' : Math.min(5, Math.max(0, Number(v))) }));
+  };
+
   useEffect(() => {
-    if (userRole === 'admin') {
-      navigate(-1);
-    }
+    if (userRole === 'admin') navigate(-1);
   }, [userRole, navigate]);
 
-  // Fetch categories
   useEffect(() => {
     axios.get(__categoryapiurl + "fetch")
-      .then((response) => setCatList(response.data.userDetails || []))
-      .catch((error) => {
-        console.log(error);
-        showToast(error?.response?.data?.message || 'Could not load categories.', 'error');
-      });
+      .then(res => setCatList(res.data.userDetails || []))
+      .catch(err => showToast(err?.response?.data?.message || 'Could not load categories.', 'error'));
   }, [showToast]);
 
-  // Fetch subcategories
   useEffect(() => {
-    if (!catnm) {
-      setSubcatList([]);
-      return;
-    }
+    if (!form.catnm) { setSubcatList([]); return; }
 
-    axios.get(__subcategoryapiurl + "fetch", { params: { catnm } })
-      .then((response) => setSubcatList(response.data.userDetails || []))
-      .catch((error) => {
-        console.log(error);
+    axios.get(__subcategoryapiurl + "fetch", { params: { catnm: form.catnm } })
+      .then(res => setSubcatList(res.data.userDetails || []))
+      .catch(err => {
         showToast(
-          error?.response?.status === 404
+          err?.response?.status === 404
             ? 'No subcategories found.'
-            : error?.response?.data?.message || 'Could not load subcategories.',
+            : err?.response?.data?.message || 'Could not load subcategories.',
           'warning'
         );
         setSubcatList([]);
       });
-  }, [catnm, showToast]);
-
-  // ✅ USED NOW
-  const handleRating = (e) => {
-    const v = e.target.value;
-    if (v === '') {
-      setRating('');
-      return;
-    }
-    setRating(Math.min(5, Math.max(0, Number(v))));
-  };
+  }, [form.catnm, showToast]);
 
   const resetForm = () => {
-    setTitle('');
-    setPrice('');
-    setCatnm('');
-    setSubcatnm('');
-    setDescription('');
-    setRating('');
-    setReviews('');
+    setForm({ title: '', price: '', catnm: '', subcatnm: '', description: '', rating: '', reviews: '' });
     setImageFile(null);
     fileRef.current.value = '';
   };
 
- const handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
+
+    const { title, price, catnm, subcatnm, description, rating, reviews } = form;
 
     if (!catnm || !subcatnm || !title || !imageFile || !price) {
       showToast('Please fill in all required fields.', 'warning');
@@ -105,15 +86,13 @@ function AddProduct() {
     formdata.append('role', userRole);
     formdata.append('producticon', imageFile);
 
-    // ✅ reviews ko object format mein bhejo
     if (reviews) {
-      const reviewObj = JSON.stringify({
+      formdata.append('reviews', JSON.stringify({
         reviewer: userEmail,
         comment: reviews,
         rating: rating ? Number(rating) : 0,
         info: Date()
-      });
-      formdata.append('reviews', reviewObj);
+      }));
     }
 
     setLoading(true);
@@ -121,17 +100,12 @@ function AddProduct() {
     axios.post(__productapiurl + "save", formdata, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
-      .then(() => {
-        showToast('Product added!', 'success');
-        resetForm();
-      })
-      .catch((error) => {
-        console.log(error);
-        showToast(error?.response?.data?.message || 'Failed to add product.', 'error');
-      })
+      .then(() => { showToast('Product added!', 'success'); resetForm(); })
+      .catch(err => showToast(err?.response?.data?.message || 'Failed to add product.', 'error'))
       .finally(() => setLoading(false));
   };
-return (
+
+  return (
     <div className="page-section add-product-page">
 
       <div className="add-product-header">
@@ -145,9 +119,10 @@ return (
           <label>Title *</label>
           <input
             type="text"
+            name="title"
             placeholder="Product title"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
+            value={form.title}
+            onChange={handleChange}
           />
         </div>
 
@@ -155,30 +130,27 @@ return (
           <label>Price *</label>
           <input
             type="text"
+            name="price"
             placeholder="e.g. 499"
-            value={price}
-            onChange={e => setPrice(e.target.value)}
+            value={form.price}
+            onChange={handleChange}
           />
         </div>
 
         <div className="form-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
           <div className="form-group">
             <label>Category *</label>
-            <select value={catnm} onChange={e => setCatnm(e.target.value)}>
+            <select name="catnm" value={form.catnm} onChange={handleChange}>
               <option value="">Select Category</option>
-              {catList.map(c => (
-                <option key={c._id} value={c.catnm}>{c.catnm}</option>
-              ))}
+              {catList.map(c => <option key={c._id} value={c.catnm}>{c.catnm}</option>)}
             </select>
           </div>
 
           <div className="form-group">
             <label>Subcategory *</label>
-            <select value={subcatnm} onChange={e => setSubcatnm(e.target.value)}>
+            <select name="subcatnm" value={form.subcatnm} onChange={handleChange}>
               <option value="">Select Subcategory</option>
-              {subcatList.map(s => (
-                <option key={s._id} value={s.subcatnm}>{s.subcatnm}</option>
-              ))}
+              {subcatList.map(s => <option key={s._id} value={s.subcatnm}>{s.subcatnm}</option>)}
             </select>
           </div>
         </div>
@@ -196,10 +168,11 @@ return (
           <label>Rating (0–5)</label>
           <input
             type="number"
+            name="rating"
             min="0"
             max="5"
             placeholder="0"
-            value={rating}
+            value={form.rating}
             onChange={handleRating}
           />
         </div>
@@ -207,18 +180,20 @@ return (
         <div className="form-group">
           <label>Description</label>
           <textarea
+            name="description"
             placeholder="Product description..."
-            value={description}
-            onChange={e => setDescription(e.target.value)}
+            value={form.description}
+            onChange={handleChange}
           />
         </div>
 
         <div className="form-group">
           <label>Reviews</label>
           <textarea
+            name="reviews"
             placeholder="Write a review..."
-            value={reviews}
-            onChange={e => setReviews(e.target.value)}
+            value={form.reviews}
+            onChange={handleChange}
           />
         </div>
 

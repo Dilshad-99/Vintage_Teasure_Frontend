@@ -16,11 +16,26 @@ function Sidebar() {
     { label: 'Collectibles', href: '#collectibles', count: 31 },
   ];
 
-  const recentItems = [
-    { icon: '⌚', name: 'Vintage Rolex Datejust', price: '$2,500', note: 'Beautiful patina, runs perfectly' },
-    { icon: '💎', name: 'Diamond Solitaire 2ct', price: '$3,800', note: 'GIA certified, stunning clarity' },
-    { icon: '🎸', name: "Gibson Les Paul '59", price: '$4,200', note: "A musician's dream find" },
-  ];
+ const recentItems = [
+  {
+    img:   '/assets/uploads/sidebar/rolex.jpg',
+    name:  'Vintage Rolex Datejust',
+    price: '₹2,500',
+    note:  'Beautiful patina, runs perfectly'
+  },
+  {
+    img:   '/assets/uploads/sidebar/diamond.jpg',
+    name:  'Diamond Solitaire 2ct',
+    price: '₹3,800',
+    note:  'GIA certified, stunning clarity'
+  },
+  {
+    img:   '/assets/uploads/sidebar/guitar.jpg',
+    name:  "Gibson Les Paul '59",
+    price: '₹4,200',
+    note:  "A musician's dream find"
+  },
+];
 
   return (
     <aside className="sidebar">
@@ -74,15 +89,22 @@ function Sidebar() {
         <h3 className="sidebar-title">✨ Just Came In</h3>
         <div className="recent-items">
           {recentItems.map((item) => (
-            <div className="recent-item" key={item.name}>
-              <div className="recent-item-icon">{item.icon}</div>
-              <div>
-                <div className="recent-name">{item.name}</div>
-                <div className="recent-price">{item.price}</div>
-                <div className="recent-note">{item.note}</div>
-              </div>
-            </div>
-          ))}
+  <div className="recent-item" key={item.name}>
+    <div className="recent-item-icon">
+      <img
+        src={item.img}
+        alt={item.name}
+        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
+        onError={(e) => { e.target.style.display = 'none'; }}
+      />
+    </div>
+    <div>
+      <div className="recent-name">{item.name}</div>
+      <div className="recent-price">{item.price}</div>
+      <div className="recent-note">{item.note}</div>
+    </div>
+  </div>
+))}
         </div>
       </div>
 

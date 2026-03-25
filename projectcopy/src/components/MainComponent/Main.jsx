@@ -28,7 +28,11 @@ function Main() {
   return (
     <div className="home-page">
 
-      <div className="hero-banner">
+      <div className="hero-banner" style={{
+        backgroundImage: 'url(/assets/uploads/hero/hero-bg.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        }}>
         <div className="hero-content">
           <p className="hero-greeting">{greeting()} 👋</p>
           <h1>Every Item Has a <span className="gold-text">Story</span></h1>

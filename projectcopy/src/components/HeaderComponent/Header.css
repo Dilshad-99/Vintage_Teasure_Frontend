@@ -1,33 +1,28 @@
-/* ===== Header ===== */
-
 .header {
-  background: linear-gradient(180deg, #0e0e14 0%, #0a0a0f 100%);
-  padding: 0;
-  border-bottom: 1px solid var(--border-gold);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
   position: relative;
-  transition: background 0.3s ease, border-color 0.3s ease;
-}
-
-/* light theme override */
-:root[data-theme="light"] .header {
-  background: linear-gradient(180deg, #ffffff 0%, #f5f2ed 100%);
+  transition: background 0.3s ease;
 }
 
 .header::after {
   content: '';
   position: absolute;
-  bottom: -1px;
+  bottom: 0;
   left: 0;
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  opacity: 0.5;
+  background: linear-gradient(90deg, transparent, var(--border-gold), transparent);
+}
+
+:root[data-theme="light"] .header {
+  background: #ffffff;
 }
 
 .header-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -36,134 +31,65 @@
 .header-brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   text-decoration: none;
-  color: var(--white);
 }
 
 .brand-icon {
-  font-size: 36px;
+  font-size: 30px;
   color: var(--gold);
-  filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.4));
-  animation: subtlePulse 3s ease-in-out infinite;
+  transition: var(--transition);
 }
 
-@keyframes subtlePulse {
-  0%, 100% { filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.3)); }
-  50% { filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.5)); }
+.header-brand:hover .brand-icon {
+  transform: rotate(45deg) scale(1.1);
 }
 
 .brand-text h1 {
   font-family: 'Playfair Display', serif;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--white);
   line-height: 1.1;
   margin: 0;
-  letter-spacing: 0.5px;
 }
 
 .brand-tagline {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--gold);
-  letter-spacing: 3px;
+  letter-spacing: 2.5px;
   text-transform: uppercase;
-  opacity: 0.8;
+  opacity: 0.75;
+  display: block;
+  margin-top: 2px;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 24px;
-}
-
-/* ===== Search ===== */
-.header-search {
-  display: flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 30px;
-  overflow: hidden;
-  transition: var(--transition);
-}
-
-:root[data-theme="light"] .header-search {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-.header-search:focus-within {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(212, 175, 55, 0.4);
-  box-shadow: 0 0 20px rgba(212, 175, 55, 0.08);
-}
-
-.header-search input {
-  background: none;
-  border: none;
-  padding: 11px 18px;
-  color: var(--text);
-  font-size: 13px;
-  width: 220px;
-  outline: none;
-  font-family: 'Inter', sans-serif;
-}
-
-.header-search input::placeholder {
-  color: var(--text-dim);
-}
-
-.search-btn {
-  background: none;
-  border: none;
-  padding: 11px 14px;
-  cursor: pointer;
-  font-size: 16px;
-  opacity: 0.5;
-  transition: opacity 0.2s;
-}
-
-.search-btn:hover {
-  opacity: 0.9;
+  gap: 20px;
 }
 
 .header-contact {
-  color: var(--text-muted);
+  color: var(--text-dim);
   font-size: 13px;
-  font-weight: 400;
-  letter-spacing: 0.3px;
-}
-
-/* ===== Responsive ===== */
-@media (max-width: 768px) {
-  .header-inner {
-    flex-direction: column;
-    gap: 12px;
-    text-align: center;
-  }
-
-  .header-search input {
-    width: 150px;
-  }
-
-  .header-contact {
-    display: none;
-  }
-
-  .brand-text h1 {
-    font-size: 22px;
-  }
-
-  .brand-icon {
-    font-size: 28px;
-  }
+  letter-spacing: 0.2px;
 }
 
 .header-welcome {
   color: var(--gold);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  font-family: 'Inter', sans-serif;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
+  padding: 6px 14px;
+  background: var(--gold-glow);
+  border: 1px solid var(--border-gold);
+  border-radius: 99px;
+}
+
+@media (max-width: 768px) {
+  .header-inner { padding: 14px 16px; }
+  .brand-text h1 { font-size: 20px; }
+  .brand-icon { font-size: 24px; }
+  .header-contact { display: none; }
 }
