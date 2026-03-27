@@ -1,156 +1,150 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import './Charity.css';
-import { __paymentapiurl } from '../../API_URL';
-import { useToast } from '../../ToastContext';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import "./Charity.css";
+import { useToast } from "../../ToastContext";
+import { useNavigate } from "react-router-dom";
 
 function Charity() {
-  const { showToast } = useToast();
-  const [selectedAmount, setSelectedAmount] = useState(0);
-  const [customAmount,   setCustomAmount]   = useState("");
-  const [loading,        setLoading]        = useState(false);
 
-  const amounts = [100, 200, 500, 1000];
+  const { showToast } = useToast();
+  const navigate = useNavigate();
+
+  const [amount, setAmount] = useState(0);
+  const [custom, setCustom] = useState("");
+  const [monthly, setMonthly] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const preset = [100, 200, 500, 1000];
 
   useEffect(() => {
-    if (!window.Razorpay) {
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.async = true;
-      document.body.appendChild(script);
-    }
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.async = true;
+    document.body.appendChild(s);
   }, []);
 
-  const handlePresetAmount = (amt) => {
-    setSelectedAmount(amt);
-    setCustomAmount("");
-  };
-
-  const handleCustomAmount = (e) => {
-    const val = e.target.value;
-    setCustomAmount(val);
-    setSelectedAmount(Number(val) || 0);
-  };
-
-  const finalAmount = customAmount ? Number(customAmount) : selectedAmount;
+  const finalAmount = custom ? Number(custom) : amount;
 
   const payNow = async () => {
-    if (!finalAmount || finalAmount <= 0) {
-      showToast("Please select or enter an amount!", "warning");
+
+    const email = localStorage.getItem("email");
+    const name = localStorage.getItem("name");
+
+    if (!finalAmount) {
+      showToast("Enter amount", "warning");
       return;
     }
-
-    if (finalAmount < 1) {
-      showToast("Minimum donation amount is ₹1.", "warning");
-      return;
-    }
-
-    const name  = localStorage.getItem('name')  || 'Anonymous';
-    const email = localStorage.getItem('email');
-
-    if (!email) {
-      showToast("Please login before making a payment.", "warning");
-      return;
-    }
-
-    setLoading(true);
 
     try {
-      const { data } = await axios.post(__paymentapiurl, {
-        amount: finalAmount,
-        name,
-        email,
-      });
+      setLoading(true);
+
+      const res = await axios.post(
+        "http://localhost:3001/payment/processPayment",
+        { amount: finalAmount, name, email, monthly }
+      );
+
+      const data = res.data;
 
       const rzp = new window.Razorpay({
-        key:         data.key_id,
-        amount:      data.order.amount,
-        currency:    "INR",
-        name:        "Vintage Treasure",
-        description: "Support / Donation 🤝",
-        order_id:    data.order.id,
-        prefill:     { name, email },
-        theme:       { color: "#8B4513" },
+        key: data.key_id,
+        amount: data.order.amount,
+        currency: "INR",
+        order_id: data.order.id,
+        name: "Donation",
+        description: "Support ❤️",
 
         handler: async (response) => {
-          // ✅ Verify payment on backend
-          try {
-            await axios.post('http://localhost:3001/payment/verifyPayment', {
-              razorpay_order_id:   response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-            });
-            showToast("Payment Successful! 🎉 Thank you for your donation!", "success");
-          } catch (err) {
-            showToast("Payment done but verification failed.", "warning");
-          }
-          setSelectedAmount(0);
-          setCustomAmount("");
-          setLoading(false);
+          await axios.post(
+            "http://localhost:3001/payment/verifyPayment",
+            response
+          );
+
+          showToast("Payment Successful 🎉", "success");
+          navigate("/success");
         },
 
         modal: {
           ondismiss: () => {
-            showToast("Payment cancelled.", "warning");
-            setLoading(false);
+            showToast("Payment cancelled", "warning");
           }
         }
       });
 
       rzp.open();
 
-    } catch (err) {
-      showToast(err.response?.data?.error || "Payment failed. Try again.", "error");
+    } catch {
+      showToast("Payment failed", "error");
+    } finally {
       setLoading(false);
     }
   };
 
   return (
     <div className="donation-container">
+
       <div className="donation-card">
+
         <span className="donation-icon">🤝</span>
         <h1>Support / Donation</h1>
-        <p>Your contribution helps us serve the community better.</p>
+        <p>Your help matters ❤️</p>
 
+        {/* preset */}
         <div className="amount-boxes">
-          {amounts.map((amt) => (
+          {preset.map(a => (
             <div
-              key={amt}
-              className={`amt-box ${selectedAmount === amt && !customAmount ? 'selected' : ''}`}
-              onClick={() => handlePresetAmount(amt)}
+              key={a}
+              className={`amt-box ${amount === a && !custom ? "selected" : ""}`}
+              onClick={() => {
+                setAmount(a);
+                setCustom("");
+              }}
             >
-              ₹{amt}
+              ₹{a}
             </div>
           ))}
         </div>
 
+        {/* custom */}
         <div className="custom-amount-wrapper">
-          <label className="custom-amount-label">Or enter custom amount:</label>
+          <label className="custom-amount-label">Custom Amount</label>
           <div className="custom-amount-input-wrapper">
             <span className="currency-symbol">₹</span>
             <input
               type="number"
               className="custom-amount-input"
-              placeholder="Enter amount"
-              value={customAmount}
-              onChange={handleCustomAmount}
-              min="1"
+              value={custom}
+              onChange={(e) => {
+                setCustom(e.target.value);
+                setAmount(Number(e.target.value));
+              }}
             />
           </div>
         </div>
 
-        {finalAmount > 0 && (
-          <p className="selected-amount">
-            You are donating: <span>₹{finalAmount}</span>
-          </p>
-        )}
+        {/* recurring */}
+        <label>
+          <input
+            type="checkbox"
+            checked={monthly}
+            onChange={() => setMonthly(!monthly)}
+          />
+          Monthly Donation 🔁
+        </label>
+
+        {/* UPI QR */}
+        <div>
+          <h3>UPI Payment</h3>
+          <img src="/assets/upi-qr.png" width="200" alt="QR" />
+        </div>
 
         <button
-          onClick={payNow}
           className="donate-btn"
-          disabled={loading || finalAmount <= 0}
+          onClick={payNow}
+          disabled={loading}
         >
-          {loading ? 'Processing...' : `Donate ₹${finalAmount || 0} 💛`}
+          {loading ? "Processing..." : `Donate ₹${finalAmount || 0}`}
         </button>
+
       </div>
     </div>
   );

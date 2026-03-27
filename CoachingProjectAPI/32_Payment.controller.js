@@ -1,23 +1,18 @@
-import PaymentSchemaModel from "./32_Payment.model.js";
+import PaymentModel from "./32_Payment.model.js";
 import Razorpay from "razorpay";
 
-const RazorpayConstructor = Razorpay.default || Razorpay;
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 export const processPayment = async (req, res) => {
   try {
-    const { amount, name, email } = req.body;
+    const { amount, name, email, monthly } = req.body;
 
     if (!amount || !name || !email) {
-      return res.status(400).json({
-        status: false,
-        error: "Amount, name and email are required",
-      });
+      return res.status(400).json({ status: false, error: "All fields required" });
     }
-
-    const razorpay = new RazorpayConstructor({
-      key_id: process.env.RAZORPAY_KEY_ID,
-      key_secret: process.env.RAZORPAY_KEY_SECRET,
-    });
 
     const options = {
       amount: Number(amount) * 100,
@@ -25,35 +20,26 @@ export const processPayment = async (req, res) => {
       receipt: "order_" + Date.now(),
     };
 
-    let order;
-    try {
-      order = await razorpay.orders.create(options);
-    } catch (razorpayError) {
-      console.warn("Razorpay failed, using mock:", razorpayError.error?.description);
-      order = {
-        id: "order_mock_" + Date.now(),
-        amount: options.amount,
-        currency: "INR",
-      };
-    }
+    const order = await razorpay.orders.create(options);
 
-    await PaymentSchemaModel.create({
+    await PaymentModel.create({
       name,
       email,
       amount,
       orderId: order.id,
       paymentStatus: "pending",
+      monthly: monthly || false
     });
 
-    res.status(200).json({
+    res.json({
       status: true,
       order,
       key_id: process.env.RAZORPAY_KEY_ID,
     });
 
-  } catch (error) {
-    console.error("Payment error:", error);
-    res.status(500).json({ status: false, error: error.message });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: false, error: "Payment failed" });
   }
 };
 
@@ -61,25 +47,24 @@ export const verifyPayment = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id } = req.body;
 
-    if (!razorpay_order_id || !razorpay_payment_id) {
-      return res.status(400).json({
-        status: false,
-        error: "Order ID and Payment ID are required",
-      });
-    }
-
-    await PaymentSchemaModel.findOneAndUpdate(
+    await PaymentModel.findOneAndUpdate(
       { orderId: razorpay_order_id },
-      {
-        paymentStatus: "completed",
-        paymentId: razorpay_payment_id,
-      }
+      { paymentStatus: "completed", paymentId: razorpay_payment_id }
     );
 
-    res.status(200).json({ status: true, message: "Payment verified" });
+    res.json({ status: true });
 
-  } catch (error) {
-    console.error("Verify error:", error);
-    res.status(500).json({ status: false, error: error.message });
+  } catch (err) {
+    res.status(500).json({ status: false, error: "Verify failed" });
+  }
+};
+
+export const getHistory = async (req, res) => {
+  try {
+    const { email } = req.query;
+    const data = await PaymentModel.find({ email }).sort({ createdAt: -1 });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "History error" });
   }
 };

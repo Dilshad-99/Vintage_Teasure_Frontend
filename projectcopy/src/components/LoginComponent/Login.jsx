@@ -1,5 +1,5 @@
 import './Login.css';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ReCAPTCHA from 'react-google-recaptcha';
@@ -8,172 +8,212 @@ import { useToast } from '../../ToastContext';
 import { notifyAuthChange } from '../../utils/authEvents';
 
 function Login() {
+
   const { showToast } = useToast();
   const navigate = useNavigate();
   const captchaRef = useRef(null);
 
-  const [form, setForm] = useState({
-    email: '',
-    password: ''
-  });
-
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [captchaDone, setCaptchaDone] = useState(false);
   const [captchaToken, setCaptchaToken] = useState(null);
+  const [remember, setRemember] = useState(false);
 
-  // 🔑 ENV KEY (NO FALLBACK)
   const SITE_KEY = process.env.REACT_APP_RECAPTCHA_KEY;
 
-  // Debug (optional)
-  // console.log("RECAPTCHA KEY:", SITE_KEY);
+  // Load remembered email
+  useEffect(() => {
+    let savedEmail = localStorage.getItem("rememberEmail");
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRemember(true);
+    }
+  }, []);
 
-  // ✏️ Handle input
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  // 📧 Email validation
-  const isValidEmail = (email) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  // 🚀 Submit
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!form.email || !form.password) {
-      return showToast('All fields are required.', 'warning');
+    if (!email || !password) {
+      showToast("Please fill all fields", "warning");
+      return;
     }
 
-    if (!isValidEmail(form.email)) {
-      return showToast('Invalid email format.', 'warning');
-    }
-
-    if (!captchaToken) {
-      return showToast('Please complete captcha.', 'warning');
+    if (!captchaDone || !captchaToken) {
+      showToast("Please complete the captcha verification", "warning");
+      return;
     }
 
     setLoading(true);
 
-    try {
-      const res = await axios.post(
-        __userapiurl + "login",
-        {
-          email: form.email,
-          password: form.password,
-          captcha: captchaToken
-        },
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true
-        }
-      );
+    axios.post(__userapiurl + "login", {
+      email,
+      password,
+      captcha: captchaToken
+    })
+    .then((res) => {
+      const user = res.data.userDetails;
 
-      const { token, userDetails } = res.data;
+      // Save login data
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("_id", user._id);
+      localStorage.setItem("name", user.name);
+      localStorage.setItem("email", user.email);
+      localStorage.setItem("mobile", user.mobile);
+      localStorage.setItem("address", user.address);
+      localStorage.setItem("city", user.city);
+      localStorage.setItem("gender", user.gender);
+      localStorage.setItem("info", user.info);
+      localStorage.setItem("role", user.role);
 
-      // 💾 Store minimal data
-      localStorage.setItem('token', token);
-      localStorage.setItem('role', userDetails.role);
-      localStorage.setItem('name', userDetails.name);
+      // Remember email
+      if (remember) {
+        localStorage.setItem("rememberEmail", email);
+      } else {
+        localStorage.removeItem("rememberEmail");
+      }
 
       notifyAuthChange();
+      showToast("Welcome " + user.name + "! 🎉", "success");
 
-      showToast(`Welcome, ${userDetails.name}!`, 'success');
+      if (user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/user");
+      }
+    })
+    .catch((err) => {
+      let msg = "Login failed";
 
-      navigate(userDetails.role === 'admin' ? '/admin' : '/user');
+      if (err.response?.data?.message) {
+        msg = err.response.data.message;
+      }
 
-    } catch (err) {
-      showToast(
-        err?.response?.data?.message || 'Login failed',
-        'error'
-      );
+      showToast(msg, "error");
 
-      setForm({ email: '', password: '' });
+      // Reset captcha on error
+      setPassword("");
+      setCaptchaDone(false);
+      setCaptchaToken(null);
 
       if (captchaRef.current) {
         captchaRef.current.reset();
       }
-
-      setCaptchaToken(null);
-    } finally {
+    })
+    .finally(() => {
       setLoading(false);
-    }
+    });
   };
 
   return (
     <div className="page-section auth-page login-page">
+
       <div className="auth-header">
         <span className="auth-icon">😊</span>
-        <h2>Login</h2>
-        <p className="subtitle">Welcome back</p>
+        <h2>Hey, Login Here!</h2>
+        <p className="subtitle">Welcome back — good to see you again.</p>
       </div>
 
       <form className="auth-form" onSubmit={handleSubmit}>
 
-        {/* 📧 Email */}
+        {/* Email */}
         <div className="form-group">
           <label>Email</label>
           <input
             type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
           />
         </div>
 
-        {/* 🔒 Password */}
+        {/* Password */}
         <div className="form-group">
           <label>Password</label>
           <div className="password-wrapper">
             <input
-              type={showPass ? 'text' : 'password'}
-              name="password"
-              value={form.password}
-              onChange={handleChange}
+              type={showPass ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
             />
             <button
               type="button"
               className="password-toggle"
-              onClick={() => setShowPass(prev => !prev)}
+              onClick={() => setShowPass(!showPass)}
             >
-              {showPass ? '🙈' : '👁️'}
+              {showPass ? "🙈" : "👁️"}
             </button>
           </div>
         </div>
 
-        {/* 🤖 CAPTCHA */}
-        <div className="form-group">
-          {!SITE_KEY && (
-            <p style={{ color: 'red' }}>
-              ❌ RECAPTCHA KEY missing in .env
-            </p>
-          )}
-
-          <ReCAPTCHA
-            ref={captchaRef}
-            sitekey={SITE_KEY}
-            onChange={(token) => setCaptchaToken(token)}
-            onExpired={() => setCaptchaToken(null)}
-          />
+        {/* Remember + Forgot */}
+        <div className="form-extras">
+          <label className="remember-me">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+            />
+            Remember me
+          </label>
+          <Link to="/ForgetPassword" className="forgot-link">
+            Forgot password?
+          </Link>
         </div>
 
-        {/* 🔘 Submit */}
+        {/* reCAPTCHA */}
+        <div className="form-group captcha-group">
+          {!SITE_KEY ? (
+            <div style={{ 
+              padding: '15px', 
+              background: '#fff3cd', 
+              border: '1px solid #ffc107',
+              borderRadius: '8px',
+              color: '#856404'
+            }}>
+              <strong>⚠️ reCAPTCHA Not Configured</strong>
+              <p style={{ fontSize: '13px', marginTop: '5px' }}>
+                Add REACT_APP_RECAPTCHA_KEY to your .env file
+              </p>
+            </div>
+          ) : (
+            <ReCAPTCHA
+              ref={captchaRef}
+              sitekey={SITE_KEY}
+              onChange={(token) => {
+                console.log("✅ Captcha verified");
+                setCaptchaToken(token);
+                setCaptchaDone(true);
+              }}
+              onExpired={() => {
+                console.log("⏰ Captcha expired");
+                setCaptchaDone(false);
+                setCaptchaToken(null);
+              }}
+              onErrored={() => {
+                console.log("❌ Captcha error");
+                showToast("Captcha verification failed", "error");
+                setCaptchaDone(false);
+                setCaptchaToken(null);
+              }}
+            />
+          )}
+        </div>
+
+        {/* Submit Button */}
         <button
           type="submit"
           className="btn btn-primary btn-full"
-          disabled={loading}
+          disabled={loading || !captchaDone}
         >
-          {loading ? 'Please wait...' : 'Login'}
+          {loading ? "Logging in..." : "Let Me In 🔒"}
         </button>
 
-        {/* 🔗 Links */}
-        <div className="form-extras">
-          <Link to="/ForgetPassword">Forgot password?</Link>
-          <p>
-            New user? <Link to="/register">Register</Link>
-          </p>
-        </div>
+        <p className="auth-switch">
+          New around here? <Link to="/register">Come join us</Link>
+        </p>
 
       </form>
     </div>

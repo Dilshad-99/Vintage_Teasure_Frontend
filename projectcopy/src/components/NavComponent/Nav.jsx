@@ -3,13 +3,16 @@ import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import Settings from '../SettingsComponent/Settings';
 import { useTheme } from '../../ThemeContext';
+import { useToast } from '../../ToastContext';
 
 const linkClass = ({ isActive }) => isActive ? 'nav-link active' : 'nav-link';
 
 function Nav() {
   const { theme, toggleTheme } = useTheme();
-  const [role,     setRole]     = useState(localStorage.getItem('role'));
-  const [token,    setToken]    = useState(localStorage.getItem('token'));
+  const { showToast } = useToast();
+
+  const [role, setRole] = useState(localStorage.getItem('role'));
+  const [token, setToken] = useState(localStorage.getItem('token'));
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -22,17 +25,19 @@ function Nav() {
     return () => window.removeEventListener('authChange', sync);
   }, []);
 
-  // Escape key close
+  // ✅ Payment success toast
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') setMenuOpen(false); };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    const success = localStorage.getItem("paymentSuccess");
+    if (success === "true") {
+      showToast("Donation Successful 🎉", "success");
+      localStorage.removeItem("paymentSuccess");
+    }
   }, []);
 
   const closeMenu = () => setMenuOpen(false);
 
   const ThemeBtn = () => (
-    <button className="theme-toggle" onClick={toggleTheme} title="Toggle Theme">
+    <button className="theme-toggle" onClick={toggleTheme}>
       {theme === 'dark' ? '☀️' : '🌙'}
     </button>
   );
@@ -40,68 +45,79 @@ function Nav() {
   const Hamburger = () => (
     <button
       className={`hamburger ${menuOpen ? 'open' : ''}`}
-      onClick={() => setMenuOpen(p => !p)}
-      aria-label="Toggle menu"
+      onClick={() => setMenuOpen(!menuOpen)}
     >
       <span /><span /><span />
     </button>
   );
 
-  if (token && role === 'admin') return (
-    <nav className="nav">
-      <div className="nav-inner">
-        <Hamburger />
-        <ul className={`nav-list ${menuOpen ? 'nav-open' : ''}`}>
-          <li><NavLink to="/admin"          end className={linkClass} onClick={closeMenu}>Admin Home</NavLink></li>
-          <li><NavLink to="/manageUser"         className={linkClass} onClick={closeMenu}>Manage Users</NavLink></li>
-          <li><NavLink to="/addcategory"        className={linkClass} onClick={closeMenu}>Add Category</NavLink></li>
-          <li><NavLink to="/addsubcategory"     className={linkClass} onClick={closeMenu}>Add SubCategory</NavLink></li>
-          <li><NavLink to="/viewcategory"       className={linkClass} onClick={closeMenu}>View Products</NavLink></li>
-          <Settings onClose={closeMenu} />
-        </ul>
-        <div className="nav-auth">
-          <ThemeBtn />
-          <NavLink to="/logout" className="nav-auth-link" onClick={closeMenu}>Logout</NavLink>
-        </div>
-      </div>
-    </nav>
-  );
+  // 🔥 dynamic links
+  let links = [];
 
-  if (token && role === 'user') return (
-    <nav className="nav">
-      <div className="nav-inner">
-        <Hamburger />
-        <ul className={`nav-list ${menuOpen ? 'nav-open' : ''}`}>
-          <li><NavLink to="/user"         end className={linkClass} onClick={closeMenu}>User Home</NavLink></li>
-          <li><NavLink to="/viewcategory" end className={linkClass} onClick={closeMenu}>View Category</NavLink></li>
-          <li><NavLink to="/addproduct"      className={linkClass} onClick={closeMenu}>Add Product</NavLink></li>
-          <Settings onClose={closeMenu} />
-        </ul>
-        <div className="nav-auth">
-          <ThemeBtn />
-          <NavLink to="/charity" className="nav-auth-link" onClick={closeMenu}>Charity</NavLink>
-          <NavLink to="/logout"  className="nav-auth-link" onClick={closeMenu}>Logout</NavLink>
-        </div>
-      </div>
-    </nav>
-  );
+  if (token && role === "admin") {
+    links = [
+      { to: "/admin", label: "Admin Home" },
+      { to: "/manageUser", label: "Manage Users" },
+      { to: "/addcategory", label: "Add Category" },
+      { to: "/addsubcategory", label: "Add SubCategory" },
+      { to: "/viewcategory", label: "View Products" },
+      { to: "/donationhistory", label: "Donations 🧾" }
+    ];
+  } else if (token && role === "user") {
+    links = [
+      { to: "/user", label: "User Home" },
+      { to: "/viewcategory", label: "View Category" },
+      { to: "/addproduct", label: "Add Product" }
+    ];
+  } else {
+    links = [
+      { to: "/", label: "Home" },
+      { to: "/about", label: "About" },
+      { to: "/service", label: "Services" },
+      { to: "/contact", label: "Contact" }
+    ];
+  }
 
   return (
     <nav className="nav">
       <div className="nav-inner">
+
         <Hamburger />
+
         <ul className={`nav-list ${menuOpen ? 'nav-open' : ''}`}>
-          <li><NavLink to="/"        end className={linkClass} onClick={closeMenu}>Home</NavLink></li>
-          <li><NavLink to="/about"      className={linkClass} onClick={closeMenu}>About</NavLink></li>
-          <li><NavLink to="/service"    className={linkClass} onClick={closeMenu}>Services</NavLink></li>
-          <li><NavLink to="/contact"    className={linkClass} onClick={closeMenu}>Contact</NavLink></li>
+          {links.map((l, i) => (
+            <li key={i}>
+              <NavLink to={l.to} className={linkClass} onClick={closeMenu}>
+                {l.label}
+              </NavLink>
+            </li>
+          ))}
+          {token && <Settings onClose={closeMenu} />}
         </ul>
+
         <div className="nav-auth">
           <ThemeBtn />
-          <NavLink to="/login"    className="nav-auth-btn" onClick={closeMenu}>Login</NavLink>
-          <NavLink to="/register" className="nav-auth-btn" onClick={closeMenu}>Register</NavLink>
-          <NavLink to="/aiclient" className="nav-auth-btn" onClick={closeMenu}>Chat Bot</NavLink>
+
+          {!token && (
+            <>
+              <NavLink to="/login" className="nav-auth-btn">Login</NavLink>
+              <NavLink to="/register" className="nav-auth-btn">Register</NavLink>
+            </>
+          )}
+
+          {token && role === "user" && (
+            <NavLink to="/charity" className="nav-auth-link">Charity</NavLink>
+          )}
+
+          {token && (
+            <NavLink to="/logout" className="nav-auth-link">Logout</NavLink>
+          )}
+
+          {!token && (
+            <NavLink to="/aiclient" className="nav-auth-btn">Chat Bot</NavLink>
+          )}
         </div>
+
       </div>
     </nav>
   );

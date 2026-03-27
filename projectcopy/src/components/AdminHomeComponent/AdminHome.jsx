@@ -9,6 +9,7 @@ const adminLinks = [
   { to: "/addsubcategory", icon: "📂", title: "Add SubCategory", desc: "Add subcategories to categories" },
   { to: "/viewcategory",   icon: "👁️", title: "View Products",   desc: "Browse all categories and products" },
   { to: "/charity",        icon: "🤝", title: "Charity",         desc: "View and manage donations" },
+  { to: "/donationhistory", icon: "🧾", title: "Donation History", desc: "View all donations" },
   { to: "/editprofile",    icon: "✏️", title: "Edit Profile",    desc: "Update your admin information" },
   { to: "/changepassword", icon: "🔒", title: "Change Password", desc: "Keep your account secure" },
 ];

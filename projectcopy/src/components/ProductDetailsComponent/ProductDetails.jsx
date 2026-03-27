@@ -1,66 +1,154 @@
 import './ProductDetails.css';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { __productapiurl } from '../../API_URL';
 import { useToast } from '../../ToastContext';
 
 function ProductDetail() {
+
   const { showToast } = useToast();
   const navigate = useNavigate();
-  const params = useParams();
-  const printRef = useRef(null);
+  const { id } = useParams();
 
-  const userRole = localStorage.getItem('role');
+  const userRole = localStorage.getItem("role");
+  const userEmail = localStorage.getItem("email");
 
   const [product, setProduct] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
+  // fetch product
   useEffect(() => {
-    if (!params.id || isNaN(Number(params.id))) {
-      showToast('Invalid product ID.', 'error');
-      navigate(-1);
-      return;
-    }
 
-    axios.get(__productapiurl + "fetch", { params: { "_id": params.id } })
-      .then((response) => {
-        const data = response.data.userDetails;
-        if (data && data.length > 0) {
-          setProduct(data[0]);
-        } else {
-          showToast('Product not found.', 'error');
-          navigate(-1);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-        showToast(error?.response?.data?.message || 'Failed to load product.', 'error');
+    axios.get(__productapiurl + "fetch", {
+      params: { _id: id }
+    })
+    .then((res) => {
+      const data = res.data.userDetails;
+
+      if (data && data.length > 0) {
+        setProduct(data[0]);
+      } else {
+        showToast("Product not found", "error");
         navigate(-1);
-      })
-      .finally(() => setIsLoading(false));
-  }, [params.id, navigate, showToast]);
+      }
+    })
+    .catch(() => {
+      showToast("Error loading product", "error");
+      navigate(-1);
+    })
+    .finally(() => {
+      setLoading(false);
+    });
 
-  if (isLoading) return <p className="loading-msg">Loading product details...</p>;
+  }, []);
+
+  // delete
+  const handleDelete = () => {
+
+    if (!window.confirm("Delete this product?")) return;
+
+    axios.delete(__productapiurl + "delete", {
+      data: { condition_obj: { _id: Number(id) } }
+    })
+    .then(() => {
+      showToast("Deleted", "success");
+      navigate(-1);
+    })
+    .catch(() => {
+      showToast("Delete failed", "error");
+    });
+  };
+
+  if (loading) return <p className="loading-msg">Loading...</p>;
   if (!product) return null;
+
+  const canEdit =
+    userRole === "admin" ||
+    product.addedby === userEmail;
 
   return (
     <div className="product-detail-page">
-      <div className="product-detail-actions">
-        <button className="back-link" onClick={() => navigate(-1)}>← Back</button>
-        <button className="download-btn" onClick={() => window.print()}>⬇️ Download</button>
 
-        {userRole === 'admin' && (
-          <Link to={`/addreview/${product._id}`} className="add-review-btn">
+      {/* top buttons */}
+      <div className="product-detail-actions">
+
+        <button onClick={() => navigate(-1)} className="back-link">
+          ← Back
+        </button>
+
+        <button onClick={() => window.print()} className="download-btn">
+          ⬇️ Download
+        </button>
+
+        {userRole === "admin" && (
+          <Link to={"/addreview/" + product._id} className="add-review-btn">
             ✍️ Add Review
           </Link>
         )}
+
+        {canEdit && (
+          <>
+            <Link to={"/editproduct/" + product._id} className="edit-btn">
+              ✏️ Edit
+            </Link>
+
+            <button onClick={handleDelete} className="delete-btn">
+              🗑️ Delete
+            </button>
+          </>
+        )}
+
       </div>
 
-      <div className="product-detail-card" ref={printRef}>
-        <h1>{product.title}</h1>
-        <p>{product.description}</p>
+      {/* product */}
+      <div className="product-detail-card">
+
+        <img
+          src={"/assets/uploads/producticons/" + product.producticonnm}
+          alt=""
+          className="product-detail-image"
+        />
+
+        <div className="product-detail-info">
+
+          <h1>{product.title}</h1>
+
+          <p className="product-detail-price">₹{product.price}</p>
+
+          <p className="product-detail-desc">{product.description}</p>
+
+          <p className="product-detail-meta">Category: {product.catnm}</p>
+          <p className="product-detail-meta">Subcategory: {product.subcatnm}</p>
+          <p className="product-detail-meta">Added by: {product.addedby}</p>
+
+          <p className="product-detail-rating">
+            Rating: {"⭐".repeat(Math.round(product.ratings || 0))}
+          </p>
+
+        </div>
+
       </div>
+
+      {/* reviews */}
+      {product.reviews && product.reviews.length > 0 && (
+        <div className="product-reviews">
+
+          <h3>Reviews</h3>
+
+          {product.reviews.map((r, i) => (
+            <div className="review-card" key={i}>
+
+              <p>{r.reviewer}</p>
+              <p>{r.comment}</p>
+              <p>{"⭐".repeat(Math.round(r.rating))}</p>
+
+            </div>
+          ))}
+
+        </div>
+      )}
+
     </div>
   );
 }

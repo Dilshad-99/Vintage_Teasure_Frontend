@@ -26,7 +26,14 @@ const app  = express();
 const port = process.env.PORT || 3001;
 
 // Middlewares
-app.use(cors());
+// ✅ FIX: Configure CORS properly for credentialed requests
+app.use(cors({
+  origin: 'http://localhost:3000',  // Your frontend URL
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(fileUpload());

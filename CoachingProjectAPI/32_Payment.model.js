@@ -1,37 +1,23 @@
 import mongoose from "mongoose";
 
 const PaymentSchema = mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, "Name is required"],
-    lowercase: true,
-    trim: true,
-  },
-  email: {
-    type: String,
-    required: [true, "Email is required"],
-    lowercase: true,
-    trim: true,
-  },
-  amount: {
-    type: Number,
-    required: true,
-  },
+  name: String,
+  email: String,
+  amount: Number,
+
   paymentStatus: {
     type: String,
-    enum: ['pending', 'completed', 'failed', 'refunded'],
-    default: 'pending',
+    default: "pending"
   },
-  paymentId: {
-    type: String,
-    default: null,
-  },
-  orderId: {
-    type: String,
-    default: null,
-  },
-}, { timestamps: true }); // handles createdAt and updatedAt automatically
 
-const PaymentModel = mongoose.model("Payment_collection", PaymentSchema);
+  paymentId: String,
+  orderId: String,
 
-export default PaymentModel;
+  monthly: {
+    type: Boolean,
+    default: false
+  }
+
+}, { timestamps: true });
+
+export default mongoose.model("Payment_collection", PaymentSchema);

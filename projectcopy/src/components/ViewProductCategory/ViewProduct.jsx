@@ -7,42 +7,32 @@ import { useToast } from '../../ToastContext';
 
 function ViewProduct() {
   const { showToast } = useToast();
-  const params = useParams();
-  const navigate = useNavigate();
+  const { scnm }      = useParams();
+  const navigate      = useNavigate();
 
   const userEmail = localStorage.getItem('email');
-  const userRole = localStorage.getItem('role');
+  const userRole  = localStorage.getItem('role');
 
   const [productList, setProductList] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [errMsg, setErrMsg] = useState('');
+  const [isLoading,   setIsLoading]   = useState(true);
+  const [errMsg,      setErrMsg]      = useState('');
 
   useEffect(() => {
-    const loadProducts = () => {
-      const query = { subcatnm: params.scnm, role: userRole };
-      if (userRole !== 'admin') query.addedby = userEmail;
+    const query = { subcatnm: scnm, role: userRole };
+    if (userRole !== 'admin') query.addedby = userEmail;
 
-      axios.get(__productapiurl + "fetch", { params: query })
-        .then((response) => {
-          const list = response.data.userDetails || [];
-          setProductList(list);
-
-          if (list.length > 0) {
-            showToast(`${list.length} product(s) loaded!`, 'success');
-          } else {
-            showToast('No products found.', 'warning');
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-          setErrMsg('Could not load products. Please try again.');
-          showToast('Failed to load products.', 'error');
-        })
-        .finally(() => setIsLoading(false));
-    };
-
-    loadProducts();
-  }, [params.scnm, userRole, userEmail, showToast]);
+    axios.get(__productapiurl + "fetch", { params: query })
+      .then(res => {
+        const list = res.data.userDetails || [];
+        setProductList(list);
+        showToast(list.length > 0 ? `${list.length} product(s) loaded!` : 'No products found.', list.length > 0 ? 'success' : 'warning');
+      })
+      .catch(() => {
+        setErrMsg('Could not load products. Please try again.');
+        showToast('Failed to load products.', 'error');
+      })
+      .finally(() => setIsLoading(false));
+  }, [scnm, userRole, userEmail, showToast]);
 
   return (
     <div className="view-product-page">
@@ -54,15 +44,15 @@ function ViewProduct() {
       <div className="view-product-header">
         <span className="view-product-icon">🛍️</span>
         <h2>Product List</h2>
-        <p className="product-breadcrumb">{params.scnm}</p>
+        <p className="product-breadcrumb">{scnm}</p>
       </div>
 
       {isLoading && <p className="loading-msg">Loading products...</p>}
-      {errMsg && <p className="error-msg">{errMsg}</p>}
+      {errMsg    && <p className="error-msg">{errMsg}</p>}
 
       <div className="product-grid">
         {!isLoading && productList.length > 0 ? (
-          productList.map((product) => (
+          productList.map(product => (
             <div className="product-card" key={product._id}>
               <img
                 src={`/assets/uploads/producticons/${product.producticonnm}`}
@@ -71,7 +61,7 @@ function ViewProduct() {
                 onError={e => e.target.src = '/assets/placeholder.png'}
               />
               <span className="product-card-name">{product.title}</span>
-              {product.price && <span className="product-card-price">₹{product.price}</span>}
+              {product.price       && <span className="product-card-price">₹{product.price}</span>}
               {product.description && <p className="product-card-desc">{product.description}</p>}
 
               <Link to={`/productdetail/${product._id}`} className="product-detail-btn">
@@ -89,7 +79,7 @@ function ViewProduct() {
           !isLoading && (
             <div className="product-empty">
               <span className="product-empty-icon">📭</span>
-              <p>No products found for "{params.scnm}".</p>
+              <p>No products found for "{scnm}".</p>
             </div>
           )
         )}

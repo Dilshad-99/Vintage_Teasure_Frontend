@@ -9,85 +9,78 @@ function AddProduct() {
 
   const { showToast } = useToast();
   const navigate = useNavigate();
-  const fileRef = useRef(null);
+  const fileRef = useRef();
 
   const userEmail = localStorage.getItem('email');
-  const userRole  = localStorage.getItem('role');
+  const userRole = localStorage.getItem('role');
 
-  const [form, setForm] = useState({
-    title: '', price: '', catnm: '', subcatnm: '',
-    description: '', rating: '', reviews: ''
-  });
-  const [imageFile, setImageFile]   = useState(null);
-  const [catList, setCatList]       = useState([]);
+  const [title, setTitle] = useState("");
+  const [price, setPrice] = useState("");
+  const [catnm, setCatnm] = useState("");
+  const [subcatnm, setSubcatnm] = useState("");
+  const [description, setDescription] = useState("");
+  const [rating, setRating] = useState("");
+  const [reviews, setReviews] = useState("");
+
+  const [imageFile, setImageFile] = useState(null);
+  const [catList, setCatList] = useState([]);
   const [subcatList, setSubcatList] = useState([]);
-  const [loading, setLoading]       = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleRating = (e) => {
-    const v = e.target.value;
-    setForm(prev => ({ ...prev, rating: v === '' ? '' : Math.min(5, Math.max(0, Number(v))) }));
-  };
-
+  // admin block
   useEffect(() => {
-    if (userRole === 'admin') navigate(-1);
-  }, [userRole, navigate]);
+    if (userRole === "admin") {
+      navigate(-1);
+    }
+  }, []);
 
+  // load categories
   useEffect(() => {
     axios.get(__categoryapiurl + "fetch")
       .then(res => setCatList(res.data.userDetails || []))
-      .catch(err => showToast(err?.response?.data?.message || 'Could not load categories.', 'error'));
-  }, [showToast]);
+      .catch(() => showToast("Cannot load categories", "error"));
+  }, []);
 
+  // load subcategories
   useEffect(() => {
-    if (!form.catnm) { setSubcatList([]); return; }
 
-    axios.get(__subcategoryapiurl + "fetch", { params: { catnm: form.catnm } })
-      .then(res => setSubcatList(res.data.userDetails || []))
-      .catch(err => {
-        showToast(
-          err?.response?.status === 404
-            ? 'No subcategories found.'
-            : err?.response?.data?.message || 'Could not load subcategories.',
-          'warning'
-        );
-        setSubcatList([]);
-      });
-  }, [form.catnm, showToast]);
-
-  const resetForm = () => {
-    setForm({ title: '', price: '', catnm: '', subcatnm: '', description: '', rating: '', reviews: '' });
-    setImageFile(null);
-    fileRef.current.value = '';
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const { title, price, catnm, subcatnm, description, rating, reviews } = form;
-
-    if (!catnm || !subcatnm || !title || !imageFile || !price) {
-      showToast('Please fill in all required fields.', 'warning');
+    if (!catnm) {
+      setSubcatList([]);
       return;
     }
 
-    const formdata = new FormData();
-    formdata.append('title', title);
-    formdata.append('price', price);
-    formdata.append('catnm', catnm);
-    formdata.append('subcatnm', subcatnm);
-    formdata.append('description', description);
-    formdata.append('ratings', rating);
-    formdata.append('addedby', userEmail);
-    formdata.append('role', userRole);
-    formdata.append('producticon', imageFile);
+    axios.get(__subcategoryapiurl + "fetch", { params: { catnm } })
+      .then(res => setSubcatList(res.data.userDetails || []))
+      .catch(() => {
+        showToast("No subcategories", "warning");
+        setSubcatList([]);
+      });
+
+  }, [catnm]);
+
+  // submit
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!title || !price || !catnm || !subcatnm || !imageFile) {
+      showToast("Fill required fields", "warning");
+      return;
+    }
+
+    let data = new FormData();
+
+    data.append("title", title);
+    data.append("price", price);
+    data.append("catnm", catnm);
+    data.append("subcatnm", subcatnm);
+    data.append("description", description);
+    data.append("ratings", rating);
+    data.append("addedby", userEmail);
+    data.append("role", userRole);
+    data.append("producticon", imageFile);
 
     if (reviews) {
-      formdata.append('reviews', JSON.stringify({
+      data.append("reviews", JSON.stringify({
         reviewer: userEmail,
         comment: reviews,
         rating: rating ? Number(rating) : 0,
@@ -97,12 +90,30 @@ function AddProduct() {
 
     setLoading(true);
 
-    axios.post(__productapiurl + "save", formdata, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-      .then(() => { showToast('Product added!', 'success'); resetForm(); })
-      .catch(err => showToast(err?.response?.data?.message || 'Failed to add product.', 'error'))
-      .finally(() => setLoading(false));
+    axios.post(__productapiurl + "save", data)
+      .then(() => {
+        showToast("Product added", "success");
+
+        // reset
+        setTitle("");
+        setPrice("");
+        setCatnm("");
+        setSubcatnm("");
+        setDescription("");
+        setRating("");
+        setReviews("");
+        setImageFile(null);
+
+        if (fileRef.current) {
+          fileRef.current.value = "";
+        }
+      })
+      .catch(() => {
+        showToast("Failed to add product", "error");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return (
@@ -117,42 +128,36 @@ function AddProduct() {
 
         <div className="form-group">
           <label>Title *</label>
-          <input
-            type="text"
-            name="title"
-            placeholder="Product title"
-            value={form.title}
-            onChange={handleChange}
-          />
+          <input value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
 
         <div className="form-group">
           <label>Price *</label>
-          <input
-            type="text"
-            name="price"
-            placeholder="e.g. 499"
-            value={form.price}
-            onChange={handleChange}
-          />
+          <input value={price} onChange={(e) => setPrice(e.target.value)} />
         </div>
 
         <div className="form-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+
           <div className="form-group">
             <label>Category *</label>
-            <select name="catnm" value={form.catnm} onChange={handleChange}>
-              <option value="">Select Category</option>
-              {catList.map(c => <option key={c._id} value={c.catnm}>{c.catnm}</option>)}
+            <select value={catnm} onChange={(e) => setCatnm(e.target.value)}>
+              <option value="">Select</option>
+              {catList.map(c => (
+                <option key={c._id}>{c.catnm}</option>
+              ))}
             </select>
           </div>
 
           <div className="form-group">
             <label>Subcategory *</label>
-            <select name="subcatnm" value={form.subcatnm} onChange={handleChange}>
-              <option value="">Select Subcategory</option>
-              {subcatList.map(s => <option key={s._id} value={s.subcatnm}>{s.subcatnm}</option>)}
+            <select value={subcatnm} onChange={(e) => setSubcatnm(e.target.value)}>
+              <option value="">Select</option>
+              {subcatList.map(s => (
+                <option key={s._id}>{s.subcatnm}</option>
+              ))}
             </select>
           </div>
+
         </div>
 
         <div className="form-group">
@@ -160,45 +165,33 @@ function AddProduct() {
           <input
             type="file"
             ref={fileRef}
-            onChange={e => setImageFile(e.target.files[0])}
+            onChange={(e) => setImageFile(e.target.files[0])}
           />
         </div>
 
         <div className="form-group">
-          <label>Rating (0–5)</label>
+          <label>Rating</label>
           <input
             type="number"
-            name="rating"
             min="0"
             max="5"
-            placeholder="0"
-            value={form.rating}
-            onChange={handleRating}
+            value={rating}
+            onChange={(e) => setRating(e.target.value)}
           />
         </div>
 
         <div className="form-group">
           <label>Description</label>
-          <textarea
-            name="description"
-            placeholder="Product description..."
-            value={form.description}
-            onChange={handleChange}
-          />
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
 
         <div className="form-group">
           <label>Reviews</label>
-          <textarea
-            name="reviews"
-            placeholder="Write a review..."
-            value={form.reviews}
-            onChange={handleChange}
-          />
+          <textarea value={reviews} onChange={(e) => setReviews(e.target.value)} />
         </div>
 
         <button className="add-product-btn" disabled={loading}>
-          {loading ? 'Saving...' : 'Add Product'}
+          {loading ? "Saving..." : "Add Product"}
         </button>
 
       </form>

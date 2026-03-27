@@ -8,6 +8,28 @@ function Main() {
   const [ count, setCount ] = useState(0);
   const [ now, setNow ]     = useState(new Date());
 
+  // Move recentItems from Sidebar to here
+  const recentItems = [
+    {
+      img:   '/assets/uploads/sidebar/rolex.jpg',
+      name:  'Vintage Rolex Datejust',
+      price: '₹2,500',
+      note:  'Beautiful patina, runs perfectly'
+    },
+    {
+      img:   '/assets/uploads/sidebar/diamond.jpg',
+      name:  'Diamond Solitaire 2ct',
+      price: '₹3,800',
+      note:  'GIA certified, stunning clarity'
+    },
+    // {
+    //   img:   '/assets/uploads/sidebar/guitar.jpg',
+    //   name:  "Gibson Les Paul '59",
+    //   price: '₹4,200',
+    //   note:  "A musician's dream find"
+    // },
+  ];
+
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
@@ -55,7 +77,7 @@ function Main() {
         <div className="stat-item"><span className="stat-number">98%</span><span className="stat-label">Come Back Again</span></div>
       </div>
 
-      <div className="features-section">
+      {/* <div className="features-section">
         <h2>Here's What Makes Us Different</h2>
         <div className="features-grid">
           <div className="feature-card">
@@ -73,6 +95,33 @@ function Main() {
             <h3>Real Experts, Real People</h3>
             <p>Our team has 40+ years of combined experience — and they'll happily geek out over your vintage finds with you.</p>
           </div>
+        </div>
+      </div> */}
+
+      {/* ===== NEW SECTION: Recent Items ===== */}
+      <div className="recent-items-section">
+        <h2>✨ Just Came In</h2>
+        <p className="section-subtitle">Fresh treasures that just arrived — see something you love?</p>
+        <div className="recent-items-grid">
+          {recentItems.map((item) => (
+            <div className="recent-item-card" key={item.name}>
+              <div className="recent-item-image">
+                <img
+                  src={item.img}
+                  alt={item.name}
+                  onError={(e) => { e.target.src = '/assets/uploads/placeholder.jpg'; }}
+                />
+              </div>
+              <div className="recent-item-content">
+                <h3>{item.name}</h3>
+                <p className="recent-item-note">{item.note}</p>
+                <div className="recent-item-footer">
+                  <span className="recent-item-price">{item.price}</span>
+                  <button className="btn btn-sm btn-primary">View Details</button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

@@ -27,6 +27,7 @@ import ViewSubCategory from './components/ViewSubCategoryComponent/ViewSubCatego
 import ViewProduct from './components/ViewProductCategory/ViewProduct';
 import ProductDetails from './components/ProductDetailsComponent/ProductDetails';
 import AddReview from './components/AddReviewComponent/AddReview';
+import EditProduct from './components/EditProductComponent/EditProduct';
 
 import Adminhome from './components/AdminHomeComponent/AdminHome';
 import AddCategory from './components/AddCategory/AddCategory';
@@ -37,6 +38,8 @@ import Userhome from './components/UserHomeComponent/UserHome';
 import AddProduct from './components/AddProductComponent/AddProduct';
 
 import Auth from './components/AuthComponent/Auth';
+import DonationHistory from './components/DonationComponent/DonationHistory';
+import Success from './components/SuccessComponent/Success';
 
 function App() {
   const location = useLocation();
@@ -55,6 +58,7 @@ function App() {
             <Route path="/contact"     element={<Contact />} />
             <Route path="/service"     element={<Service />} />
             <Route path="/charity"     element={<Charity />} />
+            <Route path="/success" element={<Success />} />
             <Route path="/aiclient"    element={<AIClient />} />
 
             <Route path="/register"       element={<Register />} />
@@ -70,6 +74,7 @@ function App() {
               <Route path="/viewsubcategory/:cnm" element={<ViewSubCategory />} />
               <Route path="/viewproduct/:scnm"    element={<ViewProduct />} />
               <Route path="/productdetail/:id"    element={<ProductDetails />} />
+              <Route path="/editproduct/:id"      element={<EditProduct />} />
               <Route path="/addreview/:id"        element={<AddReview />} />
               <Route path="/admin"                element={<Adminhome />} />
               <Route path="/addcategory"          element={<AddCategory />} />
@@ -77,6 +82,7 @@ function App() {
               <Route path="/manageUser"           element={<ManageUser />} />
               <Route path="/user"                 element={<Userhome />} />
               <Route path="/addproduct"           element={<AddProduct />} />
+              <Route path="/donationhistory" element={<DonationHistory />} />
             </Route>
 
             <Route path="*" element={

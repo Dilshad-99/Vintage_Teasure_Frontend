@@ -389,3 +389,106 @@
   height: 40px;
   /* ... */
 }
+/* Recent Items Section */
+.recent-items-section {
+  padding: 60px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.recent-items-section h2 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.section-subtitle {
+  text-align: center;
+  color: var(--text-muted, #666);
+  margin-bottom: 40px;
+  font-size: 1.1rem;
+}
+
+.recent-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.recent-item-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.recent-item-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.recent-item-image {
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.recent-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.recent-item-card:hover .recent-item-image img {
+  transform: scale(1.05);
+}
+
+.recent-item-content {
+  padding: 20px;
+}
+
+.recent-item-content h3 {
+  font-size: 1.3rem;
+  margin-bottom: 8px;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.recent-item-note {
+  color: var(--text-muted, #666);
+  font-size: 0.95rem;
+  margin-bottom: 15px;
+}
+
+.recent-item-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.recent-item-price {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--gold-text, #d4af37);
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .recent-items-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .recent-item-image {
+    height: 200px;
+  }
+}
