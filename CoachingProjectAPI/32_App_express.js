@@ -51,7 +51,9 @@ app.use('/product',      ProductRouter);
 app.use('/api/ai',       aiChat);
 app.use('/payment',      PaymentRouter);
 app.use('/forgetpassword', ForgetPassword);
-
+app.get("/",(req,res)=>{
+  res.send("Live");
+})
 app.listen(port, () => {
   console.log(`Server invoked at link http://localhost:${port}`);
 });
