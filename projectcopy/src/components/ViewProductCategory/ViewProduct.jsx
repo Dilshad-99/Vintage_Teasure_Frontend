@@ -55,7 +55,8 @@ function ViewProduct() {
           productList.map(product => (
             <div className="product-card" key={product._id}>
               <img
-                src={`/assets/uploads/producticons/${product.producticonnm}`}
+                // src={`/assets/uploads/producticons/${product.producticonnm}`}
+                src={`${process.env.REACT_APP_BACKEND_URL}/uploads/producticons/${product.producticonnm}`}
                 alt={product.title}
                 className="product-card-image"
                 onError={e => e.target.src = '/assets/placeholder.png'}

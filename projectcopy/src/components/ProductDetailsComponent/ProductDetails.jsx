@@ -105,7 +105,8 @@ function ProductDetail() {
       <div className="product-detail-card">
 
         <img
-          src={"/assets/uploads/producticons/" + product.producticonnm}
+          // src={"/assets/uploads/producticons/" + product.producticonnm}
+          src={`${process.env.REACT_APP_BACKEND_URL}/uploads/producticons/${product.producticonnm}`}
           alt=""
           className="product-detail-image"
         />
