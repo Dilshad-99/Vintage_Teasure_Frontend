@@ -33,7 +33,7 @@ export const SaveProduct = async (req, res) => {
         const __dirname  = path.dirname(__filename);
 
 
-        // const currentDir = url.fileURLToPath(new URL('.', import.meta.url));
+        const currentDir = url.fileURLToPath(new URL('.', import.meta.url));
         // const uploadPath = path.join(
         //     currentDir,
         //     '../../ProjectCopy/projectcopy/public/assets/uploads/producticons',
