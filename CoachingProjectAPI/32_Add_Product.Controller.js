@@ -3,6 +3,10 @@ import url from 'url';
 import path from 'path';
 import rs from 'randomstring';
 
+import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
 // Helper: unique product ID
 async function generateProductId() {
     const products = await ProductModel.find();
@@ -24,12 +28,20 @@ export const SaveProduct = async (req, res) => {
         const uploadedImage = req.files.producticon;
         const producticonnm = `${rs.generate(10)}_${Date.now()}_${uploadedImage.name}`;
 
+
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname  = path.dirname(__filename);
+
+
         const currentDir = url.fileURLToPath(new URL('.', import.meta.url));
-        const uploadPath = path.join(
-            currentDir,
-            '../../ProjectCopy/projectcopy/public/assets/uploads/producticons',
-            producticonnm
-        );
+        // const uploadPath = path.join(
+        //     currentDir,
+        //     '../../ProjectCopy/projectcopy/public/assets/uploads/producticons',
+        //     producticonnm
+        // );
+
+        // Upload path — Render pe /tmp use karo
+        const uploadPath = path.join(__dirname, 'uploads', producticonnm);
 
         const parsedReviews = req.body.reviews ? [JSON.parse(req.body.reviews)] : [];
 
