@@ -64,7 +64,6 @@
 // });
 
 // export default app;
-
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -94,10 +93,9 @@ app.use(cors({
   origin: [
     'http://localhost:3000',
     'https://vintage-teasure-fe.onrender.com',
-    'https://vintage-treasure-front-e.onrender.com'
   ],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
