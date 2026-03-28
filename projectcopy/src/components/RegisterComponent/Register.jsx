@@ -1,3 +1,4 @@
+// src/pages/auth/Register.js
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Register.css';
@@ -17,16 +18,11 @@ function Register() {
   const [loading, setLoading] = useState(false);
 
   const clearForm = () => {
-    setName("");
-    setEmail("");
-    setPassword("");
-    setMobile("");
-    setAddress("");
-    setCity("");
-    setGender("");
+    setName(""); setEmail(""); setPassword("");
+    setMobile(""); setAddress(""); setCity(""); setGender("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!name || !email || !password || !mobile || !city || !gender) {
@@ -34,19 +30,22 @@ function Register() {
       return;
     }
 
+    if (!/^\d{10}$/.test(mobile)) {
+      showToast("Mobile number must be 10 digits", "warning");
+      return;
+    }
+
     setLoading(true);
 
-    const userDetails = { name, email, password, mobile, address, city, gender };
-
-    axios.post(__userapiurl + "save", userDetails)
-      .then(() => {
-        showToast("Registered successfully! Please verify your email. 🎉", "success");
-        clearForm();
-      })
-      .catch(() => {
-        showToast("Registration failed. Email may already be in use.", "error");
-      })
-      .finally(() => setLoading(false));
+    try {
+      await axios.post(__userapiurl + "save", { name, email, password, mobile, address, city, gender });
+      showToast("Registered successfully! Please verify your email. 🎉", "success");
+      clearForm();
+    } catch {
+      showToast("Registration failed. Email may already be in use.", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -59,48 +58,26 @@ function Register() {
 
       <form className="auth-form" onSubmit={handleSubmit}>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Name</label>
-            <input
-              type="text"
-              onChange={e => setName(e.target.value)}
-              value={name}
-              placeholder="Enter your name"
-            />
-          </div>
+        <div className="form-group">
+          <label>Name</label>
+          <input type="text" onChange={e => setName(e.target.value)} value={name} placeholder="Enter your name" />
         </div>
 
         <div className="form-row two-col">
           <div className="form-group">
             <label>Email</label>
-            <input
-              type="email"
-              onChange={e => setEmail(e.target.value)}
-              value={email}
-              placeholder="Enter your email"
-            />
+            <input type="email" onChange={e => setEmail(e.target.value)} value={email} placeholder="Enter your email" />
           </div>
           <div className="form-group">
             <label>Password</label>
-            <input
-              type="password"
-              onChange={e => setPassword(e.target.value)}
-              value={password}
-              placeholder="Create a password"
-            />
+            <input type="password" onChange={e => setPassword(e.target.value)} value={password} placeholder="Create a password" />
           </div>
         </div>
 
         <div className="form-row two-col">
           <div className="form-group">
             <label>Mobile</label>
-            <input
-              type="tel"
-              onChange={e => setMobile(e.target.value)}
-              value={mobile}
-              placeholder="Enter your mobile number"
-            />
+            <input type="tel" onChange={e => setMobile(e.target.value)} value={mobile} placeholder="Enter your mobile number" />
           </div>
           <div className="form-group">
             <label>City</label>
@@ -113,50 +90,20 @@ function Register() {
           </div>
         </div>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Address</label>
-            <textarea
-              onChange={e => setAddress(e.target.value)}
-              value={address}
-              placeholder="Enter your address"
-            />
+        <div className="form-group">
+          <label>Address</label>
+          <textarea onChange={e => setAddress(e.target.value)} value={address} placeholder="Enter your address" />
+        </div>
+
+        <div className="form-group">
+          <label>Gender</label>
+          <div className="gender-group">
+            <label><input type="radio" name="gender" value="male" checked={gender === "male"} onChange={e => setGender(e.target.value)} /> Male</label>
+            <label><input type="radio" name="gender" value="female" checked={gender === "female"} onChange={e => setGender(e.target.value)} /> Female</label>
           </div>
         </div>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Gender</label>
-            <div className="gender-group">
-              <label className="gender-option">
-                <input
-                  type="radio"
-                  name="gender"
-                  onChange={e => setGender(e.target.value)}
-                  value="male"
-                  checked={gender === "male"}
-                />
-                Male
-              </label>
-              <label className="gender-option">
-                <input
-                  type="radio"
-                  name="gender"
-                  onChange={e => setGender(e.target.value)}
-                  value="female"
-                  checked={gender === "female"}
-                />
-                Female
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          className="btn btn-primary btn-full"
-          disabled={loading}
-        >
+        <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
           {loading ? 'Registering...' : "Let's Go! 🎉"}
         </button>
 

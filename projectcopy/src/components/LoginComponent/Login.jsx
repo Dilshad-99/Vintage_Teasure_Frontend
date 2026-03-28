@@ -1,3 +1,4 @@
+// src/pages/auth/Login.js
 import './Login.css';
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -8,7 +9,6 @@ import { useToast } from '../../ToastContext';
 import { notifyAuthChange } from '../../utils/authEvents';
 
 function Login() {
-
   const { showToast } = useToast();
   const navigate = useNavigate();
   const captchaRef = useRef(null);
@@ -21,18 +21,18 @@ function Login() {
   const [captchaToken, setCaptchaToken] = useState(null);
   const [remember, setRemember] = useState(false);
 
-  const SITE_KEY = process.env.REACT_APP_RECAPTCHA_KEY;
+  const SITE_KEY = process.env.REACT_APP_RECAPTCHA_SITE_KEY; // Only frontend site key
 
   // Load remembered email
   useEffect(() => {
-    let savedEmail = localStorage.getItem("rememberEmail");
+    const savedEmail = localStorage.getItem("rememberEmail");
     if (savedEmail) {
       setEmail(savedEmail);
       setRemember(true);
     }
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -47,12 +47,13 @@ function Login() {
 
     setLoading(true);
 
-    axios.post(__userapiurl + "login", {
-      email,
-      password,
-      captcha: captchaToken
-    })
-    .then((res) => {
+    try {
+      const res = await axios.post(__userapiurl + "login", {
+        email,
+        password,
+        captcha: captchaToken
+      });
+
       const user = res.data.userDetails;
 
       // Save login data
@@ -64,7 +65,7 @@ function Login() {
       localStorage.setItem("address", user.address);
       localStorage.setItem("city", user.city);
       localStorage.setItem("gender", user.gender);
-      localStorage.setItem("info", user.info);
+      localStorage.setItem("info", user.info || "");
       localStorage.setItem("role", user.role);
 
       // Remember email
@@ -75,40 +76,27 @@ function Login() {
       }
 
       notifyAuthChange();
-      showToast("Welcome " + user.name + "! 🎉", "success");
+      showToast(`Welcome ${user.name}! 🎉`, "success");
 
-      if (user.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/user");
-      }
-    })
-    .catch((err) => {
-      let msg = "Login failed";
+      if (user.role === "admin") navigate("/admin");
+      else navigate("/user");
 
-      if (err.response?.data?.message) {
-        msg = err.response.data.message;
-      }
-
+    } catch (err) {
+      const msg = err.response?.data?.message || "Login failed";
       showToast(msg, "error");
 
-      // Reset captcha on error
       setPassword("");
       setCaptchaDone(false);
       setCaptchaToken(null);
 
-      if (captchaRef.current) {
-        captchaRef.current.reset();
-      }
-    })
-    .finally(() => {
+      if (captchaRef.current) captchaRef.current.reset();
+    } finally {
       setLoading(false);
-    });
+    }
   };
 
   return (
     <div className="page-section auth-page login-page">
-
       <div className="auth-header">
         <span className="auth-icon">😊</span>
         <h2>Hey, Login Here!</h2>
@@ -166,39 +154,28 @@ function Login() {
         {/* reCAPTCHA */}
         <div className="form-group captcha-group">
           {!SITE_KEY ? (
-            <div style={{ 
-              padding: '15px', 
-              background: '#fff3cd', 
-              border: '1px solid #ffc107',
-              borderRadius: '8px',
-              color: '#856404'
-            }}>
+            <div className="captcha-warning">
               <strong>⚠️ reCAPTCHA Not Configured</strong>
-              <p style={{ fontSize: '13px', marginTop: '5px' }}>
-                Add REACT_APP_RECAPTCHA_KEY to your .env file
-              </p>
+              <p>Add REACT_APP_RECAPTCHA_SITE_KEY to your .env</p>
             </div>
           ) : (
             <ReCAPTCHA
-              ref={captchaRef}
-              sitekey={SITE_KEY}
-              onChange={(token) => {
-                console.log("✅ Captcha verified");
-                setCaptchaToken(token);
-                setCaptchaDone(true);
-              }}
-              onExpired={() => {
-                console.log("⏰ Captcha expired");
-                setCaptchaDone(false);
-                setCaptchaToken(null);
-              }}
-              onErrored={() => {
-                console.log("❌ Captcha error");
-                showToast("Captcha verification failed", "error");
-                setCaptchaDone(false);
-                setCaptchaToken(null);
-              }}
-            />
+  ref={captchaRef}
+  sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY} // already in .env
+  onChange={(token) => {
+    setCaptchaToken(token);
+    setCaptchaDone(true);
+  }}
+  onExpired={() => {
+    setCaptchaDone(false);
+    setCaptchaToken(null);
+  }}
+  onErrored={() => {
+    showToast("Captcha verification failed", "error");
+    setCaptchaDone(false);
+    setCaptchaToken(null);
+  }}
+/>
           )}
         </div>
 
@@ -214,7 +191,6 @@ function Login() {
         <p className="auth-switch">
           New around here? <Link to="/register">Come join us</Link>
         </p>
-
       </form>
     </div>
   );

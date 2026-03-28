@@ -913,14 +913,12 @@
 // //   };
 // // };
 
-
-
 import dotenv from 'dotenv';
 dotenv.config();
 
-import bcrypt      from 'bcryptjs';
-import jwt         from 'jsonwebtoken';
-import sendMail    from "./32_nodeMailer.js";
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import sendMail from "./32_nodeMailer.js";
 import "./32_connection_express.js";
 import UserSchemaModel from './32_User.model_express.js';
 
@@ -934,70 +932,77 @@ export const save = async (req, res) => {
     const lastUser = await UserSchemaModel.find().sort({ _id: -1 }).limit(1);
     const _id = lastUser.length === 0 ? 1 : lastUser[0]._id + 1;
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
     const userDetails = {
       ...req.body,
       _id,
       password: hashedPassword,
-      status: 0,       // unverified
+      status: 0,
       role: "user",
       info: Date()
     };
 
     await UserSchemaModel.create(userDetails);
-
-    // Send verification email (name passed, NO password)
     sendMail(userDetails.email, userDetails.name, "register");
 
-    res.status(201).json({ "status": "OK", "message": "Registered! Please verify your email." });
+    res.status(201).json({ status: "OK", message: "Registered! Please verify your email." });
 
   } catch (error) {
     console.log("Registration Error:", error.message);
-    res.status(500).json({ "status": false, "error": error.message });
+    res.status(500).json({ status: false, error: error.message });
   }
 };
 
 // ─────────────────────────────────────────
-// LOGIN
+// LOGIN (with captcha verify)
 // ─────────────────────────────────────────
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, captcha } = req.body;
 
-    // Find user by email only
+    // 1. Verify captcha
+    const captchaRes = await fetch(
+      `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.REACT_RECAPTCHA_SECRET_KEY}&response=${captcha}`,
+      { method: 'POST' }
+    );
+    const captchaData = await captchaRes.json();
+
+    if (!captchaData.success) {
+      return res.status(400).json({ token: "error", message: "Captcha verification failed" });
+    }
+
+    // 2. Find user
     const user = await UserSchemaModel.findOne({ email: email.toLowerCase() });
 
     if (!user) {
-      return res.status(404).json({ "token": "error", "message": "User not found" });
+      return res.status(404).json({ token: "error", message: "User not found" });
     }
 
     if (user.status !== 1) {
-      return res.status(403).json({ "token": "error", "message": "Please verify your email first" });
+      return res.status(403).json({ token: "error", message: "Please verify your email first" });
     }
 
-    // Compare hashed password
+    // 3. Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ "token": "error", "message": "Invalid credentials" });
+      return res.status(401).json({ token: "error", message: "Invalid credentials" });
     }
 
-    // Generate JWT properly (payload = object, secret = string)
+    // 4. Generate token
     const token = jwt.sign(
       { _id: user._id, email: user.email, role: user.role },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    // Send login notification email
     sendMail(user.email, user.name, "login");
 
-    res.status(200).json({ "token": token, "userDetails": user });
+    res.status(200).json({ token, userDetails: user });
 
   } catch (error) {
     console.log("Login Error:", error.message);
-    res.status(500).json({ "token": "error", "message": "Server error" });
+    res.status(500).json({ token: "error", message: "Server error" });
   }
 };
 
@@ -1011,11 +1016,11 @@ export const verifyEmail = async (req, res) => {
     const user = await UserSchemaModel.findOne({ email: email.toLowerCase() });
 
     if (!user) {
-      return res.status(404).json({ "status": false, "message": "User not found" });
+      return res.status(404).json({ status: false, message: "User not found" });
     }
 
     if (user.status === 1) {
-      return res.status(200).json({ "status": true, "message": "Already verified" });
+      return res.status(200).json({ status: true, message: "Already verified" });
     }
 
     await UserSchemaModel.updateOne(
@@ -1023,10 +1028,10 @@ export const verifyEmail = async (req, res) => {
       { $set: { status: 1 } }
     );
 
-    res.status(200).json({ "status": true, "message": "Email verified successfully!" });
+    res.status(200).json({ status: true, message: "Email verified successfully!" });
 
   } catch (error) {
-    res.status(500).json({ "status": false, "error": error.message });
+    res.status(500).json({ status: false, error: error.message });
   }
 };
 
@@ -1035,14 +1040,13 @@ export const verifyEmail = async (req, res) => {
 // ─────────────────────────────────────────
 export const fetch = async (req, res) => {
   try {
-    const condition_obj = req.query;
-    const userList = await UserSchemaModel.find(condition_obj);
+    const userList = await UserSchemaModel.find(req.query);
     if (userList.length !== 0)
-      res.status(200).json({ "status": true, "userDetails": userList });
+      res.status(200).json({ status: true, userDetails: userList });
     else
-      res.status(404).json({ "status": false, "message": "Resource not found" });
+      res.status(404).json({ status: false, message: "Resource not found" });
   } catch (error) {
-    res.status(500).json({ "status": false });
+    res.status(500).json({ status: false });
   }
 };
 
@@ -1051,18 +1055,15 @@ export const fetch = async (req, res) => {
 // ─────────────────────────────────────────
 export var deleteUser = async (req, res) => {
   try {
-    let userDetails = await UserSchemaModel.findOne(req.body);
+    const userDetails = await UserSchemaModel.findOne(req.body);
     if (userDetails) {
-      var user = await UserSchemaModel.deleteOne(req.body);
-      if (user)
-        res.status(200).json({ "status": "ok" });
-      else
-        res.status(500).json({ "status": "server issue" });
+      await UserSchemaModel.deleteOne(req.body);
+      res.status(200).json({ status: "ok" });
     } else {
-      res.status(400).json({ "status": "user not found" });
+      res.status(400).json({ status: "user not found" });
     }
   } catch (error) {
-    res.status(500).json({ "status": false });
+    res.status(500).json({ status: false });
   }
 };
 
@@ -1071,26 +1072,23 @@ export var deleteUser = async (req, res) => {
 // ─────────────────────────────────────────
 export var update = async (req, res) => {
   try {
-    let userDetails = await UserSchemaModel.findOne(req.body.condition_obj);
+    const userDetails = await UserSchemaModel.findOne(req.body.condition_obj);
     if (userDetails) {
-      let user = await UserSchemaModel.updateMany(
+      await UserSchemaModel.updateMany(
         req.body.condition_obj,
         { $set: req.body.content_obj }
       );
-      if (user)
-        res.status(200).json({ "status": "OK" });
-      else
-        res.status(500).json({ "status": "Server Error" });
+      res.status(200).json({ status: "OK" });
     } else {
-      res.status(404).json({ "status": "Requested resource not available" });
+      res.status(404).json({ status: "Requested resource not available" });
     }
   } catch (error) {
-    res.status(500).json({ "status": false });
+    res.status(500).json({ status: false });
   }
 };
 
 // ─────────────────────────────────────────
-// CHANGE PASSWORD (bcrypt aware)
+// CHANGE PASSWORD
 // ─────────────────────────────────────────
 export const changePassword = async (req, res) => {
   try {
@@ -1099,16 +1097,14 @@ export const changePassword = async (req, res) => {
     const user = await UserSchemaModel.findOne({ email: email.toLowerCase() });
 
     if (!user) {
-      return res.status(404).json({ "status": false, "message": "User not found" });
+      return res.status(404).json({ status: false, message: "User not found" });
     }
 
-    // Compare old password with hashed password in DB
     const isMatch = await bcrypt.compare(oldPassword, user.password);
     if (!isMatch) {
-      return res.status(401).json({ "status": false, "message": "Current password is incorrect" });
+      return res.status(401).json({ status: false, message: "Current password is incorrect" });
     }
 
-    // Hash new password
     const hashedNew = await bcrypt.hash(newPassword, 10);
 
     await UserSchemaModel.updateOne(
@@ -1116,10 +1112,10 @@ export const changePassword = async (req, res) => {
       { $set: { password: hashedNew } }
     );
 
-    res.status(200).json({ "status": true, "message": "Password changed successfully" });
+    res.status(200).json({ status: true, message: "Password changed successfully" });
 
   } catch (error) {
     console.log("ChangePassword Error:", error.message);
-    res.status(500).json({ "status": false, "error": error.message });
+    res.status(500).json({ status: false, error: error.message });
   }
 };
