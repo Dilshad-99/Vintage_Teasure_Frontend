@@ -1,23 +1,20 @@
 import './Login.css';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { __userapiurl } from '../../API_URL';
 import { useToast } from '../../ToastContext';
 import { notifyAuthChange } from '../../utils/authEvents';
 
 function Login() {
   const { showToast } = useToast();
-  const navigate   = useNavigate();
-  const captchaRef = useRef(null);
+  const navigate = useNavigate();
 
-  const [email,        setEmail]        = useState("");
-  const [password,     setPassword]     = useState("");
-  const [showPass,     setShowPass]     = useState(false);
-  const [loading,      setLoading]      = useState(false);
-  const [remember,     setRemember]     = useState(false);
-  const [captchaToken, setCaptchaToken] = useState(null);
+  const [email,    setEmail]    = useState("");
+  const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [loading,  setLoading]  = useState(false);
+  const [remember, setRemember] = useState(false);
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberEmail");
@@ -31,16 +28,14 @@ function Login() {
     e.preventDefault();
 
     if (!email || !password) {
-      showToast("Please fill all fields", "warning"); return;
-    }
-    if (!captchaToken) {
-      showToast("Please complete the captcha", "warning"); return;
+      showToast("Please fill all fields", "warning");
+      return;
     }
 
     setLoading(true);
 
     try {
-      const res  = await axios.post(__userapiurl + "login", { email, password, captcha: captchaToken });
+      const res = await axios.post(__userapiurl + "login", { email, password });
       const user = res.data.userDetails;
 
       localStorage.setItem("token",   res.data.token);
@@ -69,8 +64,6 @@ function Login() {
     } catch (err) {
       showToast(err.response?.data?.message || "Login failed", "error");
       setPassword("");
-      setCaptchaToken(null);
-      captchaRef.current?.resetCaptcha();
     } finally {
       setLoading(false);
     }
@@ -123,16 +116,7 @@ function Login() {
           <Link to="/ForgetPassword" className="forgot-link">Forgot password?</Link>
         </div>
 
-        <div className="form-group">
-          <HCaptcha
-            ref={captchaRef}
-            sitekey={process.env.REACT_APP_HCAPTCHA_SITE_KEY}
-            onVerify={token => setCaptchaToken(token)}
-            onExpire={() => setCaptchaToken(null)}
-          />
-        </div>
-
-        <button type="submit" className="btn btn-primary btn-full" disabled={loading || !captchaToken}>
+        <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
           {loading ? "Logging in..." : "Let Me In"}
         </button>
 
