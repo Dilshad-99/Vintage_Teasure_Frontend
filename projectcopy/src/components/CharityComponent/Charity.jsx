@@ -3,14 +3,15 @@ import axios from "axios";
 import "./Charity.css";
 import { useToast } from "../../ToastContext";
 import { useNavigate } from "react-router-dom";
+import { __paymentapiurl } from "../../API_URL";
 
 function Charity() {
 
   const { showToast } = useToast();
   const navigate = useNavigate();
 
-  const [amount, setAmount] = useState(0);
-  const [custom, setCustom] = useState("");
+  const [amount,  setAmount]  = useState(0);
+  const [custom,  setCustom]  = useState("");
   const [monthly, setMonthly] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -26,47 +27,36 @@ function Charity() {
   const finalAmount = custom ? Number(custom) : amount;
 
   const payNow = async () => {
-
     const email = localStorage.getItem("email");
-    const name = localStorage.getItem("name");
+    const name  = localStorage.getItem("name");
 
     if (!finalAmount) {
-      showToast("Enter amount", "warning");
-      return;
+      showToast("Enter amount", "warning"); return;
     }
 
+    setLoading(true);
+
     try {
-      setLoading(true);
-
-      const res = await axios.post(
-        "http://localhost:3001/payment/processPayment",
-        { amount: finalAmount, name, email, monthly }
-      );
-
+      const res  = await axios.post(__paymentapiurl, { amount: finalAmount, name, email, monthly });
       const data = res.data;
 
       const rzp = new window.Razorpay({
-        key: data.key_id,
-        amount: data.order.amount,
+        key:      data.key_id,
+        amount:   data.order.amount,
         currency: "INR",
         order_id: data.order.id,
-        name: "Donation",
+        name:     "Donation",
         description: "Support ❤️",
 
         handler: async (response) => {
-          await axios.post(
-            "http://localhost:3001/payment/verifyPayment",
-            response
-          );
-
+          const BASE_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:3001";
+          await axios.post(`${BASE_URL}/payment/verifyPayment`, response);
           showToast("Payment Successful 🎉", "success");
-          navigate("/success");
+          navigate("/");
         },
 
         modal: {
-          ondismiss: () => {
-            showToast("Payment cancelled", "warning");
-          }
+          ondismiss: () => showToast("Payment cancelled", "warning")
         }
       });
 
@@ -81,30 +71,24 @@ function Charity() {
 
   return (
     <div className="donation-container">
-
       <div className="donation-card">
 
         <span className="donation-icon">🤝</span>
         <h1>Support / Donation</h1>
         <p>Your help matters ❤️</p>
 
-        {/* preset */}
         <div className="amount-boxes">
           {preset.map(a => (
             <div
               key={a}
               className={`amt-box ${amount === a && !custom ? "selected" : ""}`}
-              onClick={() => {
-                setAmount(a);
-                setCustom("");
-              }}
+              onClick={() => { setAmount(a); setCustom(""); }}
             >
               ₹{a}
             </div>
           ))}
         </div>
 
-        {/* custom */}
         <div className="custom-amount-wrapper">
           <label className="custom-amount-label">Custom Amount</label>
           <div className="custom-amount-input-wrapper">
@@ -113,35 +97,17 @@ function Charity() {
               type="number"
               className="custom-amount-input"
               value={custom}
-              onChange={(e) => {
-                setCustom(e.target.value);
-                setAmount(Number(e.target.value));
-              }}
+              onChange={e => { setCustom(e.target.value); setAmount(Number(e.target.value)); }}
             />
           </div>
         </div>
 
-        {/* recurring */}
         <label>
-          <input
-            type="checkbox"
-            checked={monthly}
-            onChange={() => setMonthly(!monthly)}
-          />
+          <input type="checkbox" checked={monthly} onChange={() => setMonthly(!monthly)} />
           Monthly Donation 🔁
         </label>
 
-        {/* UPI QR */}
-        <div>
-          <h3>UPI Payment</h3>
-          <img src="/assets/upi-qr.png" width="200" alt="QR" />
-        </div>
-
-        <button
-          className="donate-btn"
-          onClick={payNow}
-          disabled={loading}
-        >
+        <button className="donate-btn" onClick={payNow} disabled={loading}>
           {loading ? "Processing..." : `Donate ₹${finalAmount || 0}`}
         </button>
 
