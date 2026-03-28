@@ -913,6 +913,213 @@
 // //   };
 // // };
 
+// import dotenv from 'dotenv';
+// dotenv.config();
+
+// import bcrypt from 'bcryptjs';
+// import jwt from 'jsonwebtoken';
+// import sendMail from "./32_nodeMailer.js";
+// import "./32_connection_express.js";
+// import UserSchemaModel from './32_User.model_express.js';
+
+// const JWT_SECRET = process.env.JWT_SECRET || "vintage_treasure_secret";
+
+// // ─────────────────────────────────────────
+// // REGISTER
+// // ─────────────────────────────────────────
+// export const save = async (req, res) => {
+//   try {
+//     const lastUser = await UserSchemaModel.find().sort({ _id: -1 }).limit(1);
+//     const _id = lastUser.length === 0 ? 1 : lastUser[0]._id + 1;
+
+//     const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
+//     const userDetails = {
+//       ...req.body,
+//       _id,
+//       password: hashedPassword,
+//       status: 0,
+//       role: "user",
+//       info: Date()
+//     };
+
+//     await UserSchemaModel.create(userDetails);
+//     sendMail(userDetails.email, userDetails.name, "register");
+
+//     res.status(201).json({ status: "OK", message: "Registered! Please verify your email." });
+
+//   } catch (error) {
+//     console.log("Registration Error:", error.message);
+//     res.status(500).json({ status: false, error: error.message });
+//   }
+// };
+
+// // ─────────────────────────────────────────
+// // LOGIN (with captcha verify)
+// // ─────────────────────────────────────────
+// export const login = async (req, res) => {
+//   try {
+//     const { email, password, captcha } = req.body;
+
+//     // 1. Verify captcha
+//     const captchaRes = await fetch(
+//       `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.REACT_RECAPTCHA_SECRET_KEY}&response=${captcha}`,
+//       { method: 'POST' }
+//     );
+//     const captchaData = await captchaRes.json();
+
+//     if (!captchaData.success) {
+//       return res.status(400).json({ token: "error", message: "Captcha verification failed" });
+//     }
+
+//     // 2. Find user
+//     const user = await UserSchemaModel.findOne({ email: email.toLowerCase() });
+
+//     if (!user) {
+//       return res.status(404).json({ token: "error", message: "User not found" });
+//     }
+
+//     if (user.status !== 1) {
+//       return res.status(403).json({ token: "error", message: "Please verify your email first" });
+//     }
+
+//     // 3. Check password
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) {
+//       return res.status(401).json({ token: "error", message: "Invalid credentials" });
+//     }
+
+//     // 4. Generate token
+//     const token = jwt.sign(
+//       { _id: user._id, email: user.email, role: user.role },
+//       JWT_SECRET,
+//       { expiresIn: "7d" }
+//     );
+
+//     sendMail(user.email, user.name, "login");
+
+//     res.status(200).json({ token, userDetails: user });
+
+//   } catch (error) {
+//     console.log("Login Error:", error.message);
+//     res.status(500).json({ token: "error", message: "Server error" });
+//   }
+// };
+
+// // ─────────────────────────────────────────
+// // VERIFY EMAIL
+// // ─────────────────────────────────────────
+// export const verifyEmail = async (req, res) => {
+//   try {
+//     const { email } = req.params;
+
+//     const user = await UserSchemaModel.findOne({ email: email.toLowerCase() });
+
+//     if (!user) {
+//       return res.status(404).json({ status: false, message: "User not found" });
+//     }
+
+//     if (user.status === 1) {
+//       return res.status(200).json({ status: true, message: "Already verified" });
+//     }
+
+//     await UserSchemaModel.updateOne(
+//       { email: email.toLowerCase() },
+//       { $set: { status: 1 } }
+//     );
+
+//     res.status(200).json({ status: true, message: "Email verified successfully!" });
+
+//   } catch (error) {
+//     res.status(500).json({ status: false, error: error.message });
+//   }
+// };
+
+// // ─────────────────────────────────────────
+// // FETCH
+// // ─────────────────────────────────────────
+// export const fetch = async (req, res) => {
+//   try {
+//     const userList = await UserSchemaModel.find(req.query);
+//     if (userList.length !== 0)
+//       res.status(200).json({ status: true, userDetails: userList });
+//     else
+//       res.status(404).json({ status: false, message: "Resource not found" });
+//   } catch (error) {
+//     res.status(500).json({ status: false });
+//   }
+// };
+
+// // ─────────────────────────────────────────
+// // DELETE
+// // ─────────────────────────────────────────
+// export var deleteUser = async (req, res) => {
+//   try {
+//     const userDetails = await UserSchemaModel.findOne(req.body);
+//     if (userDetails) {
+//       await UserSchemaModel.deleteOne(req.body);
+//       res.status(200).json({ status: "ok" });
+//     } else {
+//       res.status(400).json({ status: "user not found" });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ status: false });
+//   }
+// };
+
+// // ─────────────────────────────────────────
+// // UPDATE
+// // ─────────────────────────────────────────
+// export var update = async (req, res) => {
+//   try {
+//     const userDetails = await UserSchemaModel.findOne(req.body.condition_obj);
+//     if (userDetails) {
+//       await UserSchemaModel.updateMany(
+//         req.body.condition_obj,
+//         { $set: req.body.content_obj }
+//       );
+//       res.status(200).json({ status: "OK" });
+//     } else {
+//       res.status(404).json({ status: "Requested resource not available" });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ status: false });
+//   }
+// };
+
+// // ─────────────────────────────────────────
+// // CHANGE PASSWORD
+// // ─────────────────────────────────────────
+// export const changePassword = async (req, res) => {
+//   try {
+//     const { email, oldPassword, newPassword } = req.body;
+
+//     const user = await UserSchemaModel.findOne({ email: email.toLowerCase() });
+
+//     if (!user) {
+//       return res.status(404).json({ status: false, message: "User not found" });
+//     }
+
+//     const isMatch = await bcrypt.compare(oldPassword, user.password);
+//     if (!isMatch) {
+//       return res.status(401).json({ status: false, message: "Current password is incorrect" });
+//     }
+
+//     const hashedNew = await bcrypt.hash(newPassword, 10);
+
+//     await UserSchemaModel.updateOne(
+//       { email: email.toLowerCase() },
+//       { $set: { password: hashedNew } }
+//     );
+
+//     res.status(200).json({ status: true, message: "Password changed successfully" });
+
+//   } catch (error) {
+//     console.log("ChangePassword Error:", error.message);
+//     res.status(500).json({ status: false, error: error.message });
+//   }
+// };
+
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -924,9 +1131,6 @@ import UserSchemaModel from './32_User.model_express.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || "vintage_treasure_secret";
 
-// ─────────────────────────────────────────
-// REGISTER
-// ─────────────────────────────────────────
 export const save = async (req, res) => {
   try {
     const lastUser = await UserSchemaModel.find().sort({ _id: -1 }).limit(1);
@@ -954,25 +1158,10 @@ export const save = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
-// LOGIN (with captcha verify)
-// ─────────────────────────────────────────
 export const login = async (req, res) => {
   try {
-    const { email, password, captcha } = req.body;
+    const { email, password } = req.body;
 
-    // 1. Verify captcha
-    const captchaRes = await fetch(
-      `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.REACT_RECAPTCHA_SECRET_KEY}&response=${captcha}`,
-      { method: 'POST' }
-    );
-    const captchaData = await captchaRes.json();
-
-    if (!captchaData.success) {
-      return res.status(400).json({ token: "error", message: "Captcha verification failed" });
-    }
-
-    // 2. Find user
     const user = await UserSchemaModel.findOne({ email: email.toLowerCase() });
 
     if (!user) {
@@ -983,13 +1172,11 @@ export const login = async (req, res) => {
       return res.status(403).json({ token: "error", message: "Please verify your email first" });
     }
 
-    // 3. Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ token: "error", message: "Invalid credentials" });
     }
 
-    // 4. Generate token
     const token = jwt.sign(
       { _id: user._id, email: user.email, role: user.role },
       JWT_SECRET,
@@ -1006,19 +1193,14 @@ export const login = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
-// VERIFY EMAIL
-// ─────────────────────────────────────────
 export const verifyEmail = async (req, res) => {
   try {
     const { email } = req.params;
-
     const user = await UserSchemaModel.findOne({ email: email.toLowerCase() });
 
     if (!user) {
       return res.status(404).json({ status: false, message: "User not found" });
     }
-
     if (user.status === 1) {
       return res.status(200).json({ status: true, message: "Already verified" });
     }
@@ -1035,9 +1217,6 @@ export const verifyEmail = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
-// FETCH
-// ─────────────────────────────────────────
 export const fetch = async (req, res) => {
   try {
     const userList = await UserSchemaModel.find(req.query);
@@ -1050,9 +1229,6 @@ export const fetch = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
-// DELETE
-// ─────────────────────────────────────────
 export var deleteUser = async (req, res) => {
   try {
     const userDetails = await UserSchemaModel.findOne(req.body);
@@ -1067,9 +1243,6 @@ export var deleteUser = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
-// UPDATE
-// ─────────────────────────────────────────
 export var update = async (req, res) => {
   try {
     const userDetails = await UserSchemaModel.findOne(req.body.condition_obj);
@@ -1087,13 +1260,9 @@ export var update = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
-// CHANGE PASSWORD
-// ─────────────────────────────────────────
 export const changePassword = async (req, res) => {
   try {
     const { email, oldPassword, newPassword } = req.body;
-
     const user = await UserSchemaModel.findOne({ email: email.toLowerCase() });
 
     if (!user) {
@@ -1106,7 +1275,6 @@ export const changePassword = async (req, res) => {
     }
 
     const hashedNew = await bcrypt.hash(newPassword, 10);
-
     await UserSchemaModel.updateOne(
       { email: email.toLowerCase() },
       { $set: { password: hashedNew } }
