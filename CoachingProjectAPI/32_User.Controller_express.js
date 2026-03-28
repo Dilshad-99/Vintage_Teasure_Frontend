@@ -1119,7 +1119,6 @@
 //     res.status(500).json({ status: false, error: error.message });
 //   }
 // };
-
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -1160,7 +1159,19 @@ export const save = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, captcha } = req.body;
+
+    // Verify hCaptcha
+    const captchaRes = await fetch('https://hcaptcha.com/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `secret=${process.env.HCAPTCHA_SECRET_KEY}&response=${captcha}`
+    });
+    const captchaData = await captchaRes.json();
+
+    if (!captchaData.success) {
+      return res.status(400).json({ token: "error", message: "Captcha verification failed" });
+    }
 
     const user = await UserSchemaModel.findOne({ email: email.toLowerCase() });
 
@@ -1184,7 +1195,6 @@ export const login = async (req, res) => {
     );
 
     sendMail(user.email, user.name, "login");
-
     res.status(200).json({ token, userDetails: user });
 
   } catch (error) {
@@ -1198,12 +1208,8 @@ export const verifyEmail = async (req, res) => {
     const { email } = req.params;
     const user = await UserSchemaModel.findOne({ email: email.toLowerCase() });
 
-    if (!user) {
-      return res.status(404).json({ status: false, message: "User not found" });
-    }
-    if (user.status === 1) {
-      return res.status(200).json({ status: true, message: "Already verified" });
-    }
+    if (!user) return res.status(404).json({ status: false, message: "User not found" });
+    if (user.status === 1) return res.status(200).json({ status: true, message: "Already verified" });
 
     await UserSchemaModel.updateOne(
       { email: email.toLowerCase() },
@@ -1265,14 +1271,10 @@ export const changePassword = async (req, res) => {
     const { email, oldPassword, newPassword } = req.body;
     const user = await UserSchemaModel.findOne({ email: email.toLowerCase() });
 
-    if (!user) {
-      return res.status(404).json({ status: false, message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ status: false, message: "User not found" });
 
     const isMatch = await bcrypt.compare(oldPassword, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ status: false, message: "Current password is incorrect" });
-    }
+    if (!isMatch) return res.status(401).json({ status: false, message: "Current password is incorrect" });
 
     const hashedNew = await bcrypt.hash(newPassword, 10);
     await UserSchemaModel.updateOne(
@@ -1287,3 +1289,15 @@ export const changePassword = async (req, res) => {
     res.status(500).json({ status: false, error: error.message });
   }
 };
+// ```
+
+// Ab `.env` mein ye add karo aur push karo:
+
+// **Frontend `.env`:**
+// ```
+// REACT_APP_HCAPTCHA_SITE_KEY=your_site_key
+// ```
+
+// **Backend `.env`:**
+// ```
+// HCAPTCHA_SECRET_KEY=your_secret_key;
