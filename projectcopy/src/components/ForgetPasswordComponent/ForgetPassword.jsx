@@ -9,30 +9,26 @@ function ForgetPassword() {
   const { showToast } = useToast();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+const handleSubmit = (e) => {
+  e.preventDefault();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  if (!email) {
+    showToast("Please enter your email address.", "warning");
+    return;
+  }
 
-    if (!email) {
-      showToast("Please enter your email address.", "warning");
-      return;
-    }
+  setLoading(true);
 
-    setLoading(true);
-
-    axios.get(__userapiurl + "fetch", {
-      params: { "email": email }
+  axios.post(__forgetpasswordurl, { email })
+    .then(() => {
+      showToast("Reset link sent! 📧", "success");
+      setEmail('');
     })
-      .then(() => {
-        axios.post(__forgetpasswordurl, { "email": email });
-        showToast("Reset link sent! Check your email inbox. 📧", "success");
-        setEmail('');
-      })
-      .catch(() => {
-        showToast("Email address not found in our records.", "error");
-      })
-      .finally(() => setLoading(false));
-  };
+    .catch((err) => {
+      showToast("Error sending reset email", "error");
+    })
+    .finally(() => setLoading(false));
+};
 
   return (
     <div className="page-section auth-page forget-password-page">

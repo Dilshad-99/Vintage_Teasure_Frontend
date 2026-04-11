@@ -64,18 +64,26 @@
 // });
 
 // export default app;
+
+
+import { fileURLToPath } from 'url';
+import path from 'path';
 import dotenv from 'dotenv';
-dotenv.config();
+
+// ✅ __dirname setup FIRST
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = path.dirname(__filename);
+
+// ✅ dotenv ONLY ONCE + correct path
+dotenv.config({
+  path: path.join(__dirname, ".env")
+});
 
 import express from 'express';
 import cors from 'cors';
 import fileUpload from 'express-fileupload';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname  = path.dirname(__filename);
-
+import sendMail from './32_nodeMailer.js';
 import userRouter        from "./32_user.Router_express.js";
 import ForgetPassword    from './32_ForgetPassword.js';
 import CategoryRouter    from './router1.js';
@@ -89,6 +97,12 @@ import './32_connection_express.js';
 const app  = express();
 const port = process.env.PORT || 3001;
 
+// ✅ DEBUG (important)
+console.log("ENV CHECK:");
+console.log("EMAIL:", process.env.EMAIL_USER);
+console.log("PASS:", process.env.NODEPASS);
+
+// middlewares
 app.use(cors({
   origin: [
     'http://localhost:3000',
@@ -103,22 +117,27 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(fileUpload());
 
+// static
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// routes
 app.use('/user',           userRouter);
 app.use('/category',       CategoryRouter);
 app.use('/subcategory',    SubCategoryRouter);
 app.use('/product',        ProductRouter);
 app.use('/api/ai',         aiChat);
 app.use('/payment',        PaymentRouter);
-app.use('/forgetpassword', ForgetPassword);
+app.post('/forgetpassword', ForgetPassword);
 
+
+// test route
 app.get("/", (req, res) => {
   res.send("Backend Live");
 });
 
+// server start
 app.listen(port, () => {
-  console.log(`Server invoked at link http://localhost:${port}`);
+  console.log(`🚀 Server running at http://localhost:${port}`);
 });
 
 export default app;

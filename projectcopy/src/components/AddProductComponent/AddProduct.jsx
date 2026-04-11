@@ -169,7 +169,7 @@ function AddProduct() {
           />
         </div>
 
-        <div className="form-group">
+        {/* <div className="form-group">
           <label>Rating</label>
           <input
             type="number"
@@ -178,17 +178,17 @@ function AddProduct() {
             value={rating}
             onChange={(e) => setRating(e.target.value)}
           />
-        </div>
+        </div> */}
 
         <div className="form-group">
           <label>Description</label>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
 
-        <div className="form-group">
+        {/* <div className="form-group">
           <label>Reviews</label>
           <textarea value={reviews} onChange={(e) => setReviews(e.target.value)} />
-        </div>
+        </div> */}
 
         <button className="add-product-btn" disabled={loading}>
           {loading ? "Saving..." : "Add Product"}

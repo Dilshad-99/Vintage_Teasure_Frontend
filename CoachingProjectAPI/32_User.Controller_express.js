@@ -1120,6 +1120,9 @@
 //   }
 // };
 
+
+
+
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -1148,10 +1151,14 @@ export const save = async (req, res) => {
     };
 
     await UserSchemaModel.create(userDetails);
-    sendMail(userDetails.email, userDetails.name, "register");
 
+    console.log("✅ USER CREATED");
+
+    await sendMail(userDetails.email, userDetails.name, "register");
+    console.log("📧 REGISTER MAIL SENT");
     res.status(201).json({ status: "OK", message: "Registered! Please verify your email." });
-
+const result = await UserSchemaModel.create(userDetails);
+console.log("✅ USER SAVED:", result);
   } catch (error) {
     console.log("Registration Error:", error.message);
     res.status(500).json({ status: false, error: error.message });
@@ -1165,31 +1172,31 @@ export const login = async (req, res) => {
     const user = await UserSchemaModel.findOne({ email: email.toLowerCase() });
 
     if (!user) {
-      return res.status(404).json({ token: "error", message: "User not found" });
-    }
-
-    if (user.status !== 1) {
-      return res.status(403).json({ token: "error", message: "Please verify your email first" });
+      return res.status(404).json({ message: "User not found" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ token: "error", message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
+
+    console.log("✅ LOGIN SUCCESS");
 
     const token = jwt.sign(
       { _id: user._id, email: user.email, role: user.role },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
-
-    sendMail(user.email, user.name, "login");
+    console.log("STEP 1");
+    // ✅ MAIL ONLY AFTER SUCCESS LOGIN
+    await sendMail(user.email, user.name, "login");
+console.log("STEP 2");
+    console.log("📧 LOGIN MAIL SENT");
 
     res.status(200).json({ token, userDetails: user });
 
   } catch (error) {
-    console.log("Login Error:", error.message);
-    res.status(500).json({ token: "error", message: "Server error" });
+    res.status(500).json({ message: "Server error" });
   }
 };
 

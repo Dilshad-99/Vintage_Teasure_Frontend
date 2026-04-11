@@ -1,30 +1,54 @@
-import { Outlet, Navigate, useLocation } from 'react-router-dom';
+import { Outlet, Navigate, useLocation } from "react-router-dom";
 
 function Auth() {
   const { pathname } = useLocation();
 
   const token = localStorage.getItem("token");
-  const role  = localStorage.getItem("role");
+  const role = localStorage.getItem("role");
 
   const isLoggedIn = token && token !== "null" && token !== "undefined";
 
-  const publicRoutes = ["/success", "/charity"]; // ✅ only these public
+  const publicRoutes = ["/success", "/charity"];
 
-  const adminRoutes = ["/admin", "/manageUser", "/addcategory", "/addsubcategory", "/addreview", "/donationhistory"];
-  
-  const userRoutes  = ["/user", "/addproduct"];
+  const adminRoutes = [
+    "/admin",
+    "/manageUser",
+    "/addcategory",
+    "/addsubcategory",
+    "/addreview",
+    "/donationhistory",
+  ];
 
-  const is = (list) => list.some(r => pathname.startsWith(r));
+  const userRoutes = ["/user", "/addproduct"];
 
-  // ✅ public access
-  if (is(publicRoutes)) return <Outlet />;
+  // exact match helper (safer than startsWith)
+  const isExact = (list) => list.includes(pathname);
+
+  const isPrefix = (list) =>
+    list.some((route) => pathname.startsWith(route + "/") || pathname === route);
+
+  const isPublic = isPrefix(publicRoutes);
+  const isAdminRoute = isPrefix(adminRoutes);
+  const isUserRoute = isPrefix(userRoutes);
+
+  // ✅ public routes (no login required)
+  if (isPublic) return <Outlet />;
 
   // 🔐 login required
-  if (!isLoggedIn) return <Navigate to="/login" />;
+  if (!isLoggedIn) return <Navigate to="/login" replace />;
 
-  // 🔐 role-based access
-  if (role === "admin" && is(userRoutes)) return <Navigate to="/admin" />;
-  if (role === "user"  && is(adminRoutes)) return <Navigate to="/user" />;
+  // 🔐 role missing safety
+  if (!role) return <Navigate to="/login" replace />;
+
+  // 🔐 admin protection
+  if (role === "admin" && isUserRoute) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  // 🔐 user protection
+  if (role === "user" && isAdminRoute) {
+    return <Navigate to="/user" replace />;
+  }
 
   return <Outlet />;
 }

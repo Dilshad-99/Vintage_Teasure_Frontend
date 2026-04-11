@@ -35,77 +35,176 @@
 
 // export default sendMail;
 
+
+// import nodemailer from "nodemailer";
+// import dotenv from "dotenv";
+// dotenv.config();
+
+// // ✅ Transporter
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.NODEPASS,
+//   },
+// });
+
+// // ❌ REMOVE verify from production (optional debug only)
+// // transporter.verify((error, success) => {
+// //   if (error) {
+// //     console.log("❌ SMTP ERROR:", error);
+// //   } else {
+// //     console.log("✅ SMTP READY TO SEND MAIL");
+// //   }
+// // });
+
+
+
+// const sendMail = async (email, name, type = "register") => {
+//   try {
+//     console.log("🔥 sendMail CALLED");
+//     console.log("📧 EMAIL:", email);
+//     console.log("🧾 TYPE:", type);
+
+//     const info = await transporter.sendMail({
+//       from: `"Vintage Treasure" <${process.env.EMAIL_USER}>`,
+//       to: email,
+//       subject:
+//         type === "login"
+//           ? "Login Alert - Vintage Treasure"
+//           : "Welcome to Vintage Treasure",
+//       html:
+//         type === "login"
+//           ? `<h2>Hello ${name}</h2><p>You just logged in ✔</p>`
+//           : `<h2>Welcome ${name}</h2><p>Thanks for registering 🎉</p>`,
+//     });
+
+//     console.log("✅ MAIL SENT SUCCESSFULLY");
+//     console.log("📩 RESPONSE:", info.response);
+
+//   } catch (err) {
+//     console.log("❌ MAIL ERROR:", err.message);
+//   }
+// };
+
+// export default sendMail;
+
+
+
+
+
+// import nodemailer from "nodemailer";
+// import dotenv from "dotenv";
+// dotenv.config();
+
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.NODEPASS,
+//   },
+// });
+
+// transporter.verify((err, success) => {
+//   if (err) {
+//     console.log("❌ SMTP FAILED:", err.message);
+//   } else {
+//     console.log("✅ SMTP READY");
+//   }
+// });
+
+// const sendMail = async (email, name, type = "register") => {
+//   try {
+//     const info = await transporter.sendMail({
+//       from: `"Vintage Treasure" <${process.env.EMAIL_USER}>`,
+//       to: email,
+//       subject: type === "login" ? "Login Alert" : "Welcome",
+//       html: `<h2>Hello ${name}</h2><p>${type} successful</p>`
+//     });
+
+//     console.log("📧 EMAIL SENT:", info.response);
+
+//   } catch (err) {
+//     console.log("❌ MAIL ERROR:", err.message);
+//   }
+// };
+
+// export default sendMail;
+
+
 import nodemailer from "nodemailer";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
-function sendMail(email, name, type = "register") {
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.NODEPASS,
+  },
+});
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: "dilshad2307j@gmail.com",
-      pass: process.env.NODEPASS,
-    },
-  });
-
-  let subject, html;
-
-  if (type === "register") {
-    subject = "Welcome to Vintage Treasure — Verify Your Email";
-    html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
-        <div style="background: #8B4513; padding: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0;">🏺 Vintage Treasure</h1>
-        </div>
-        <div style="padding: 30px;">
-          <h2>Hello, ${name}! 👋</h2>
-          <p>Welcome to <strong>Vintage Treasure</strong> — your marketplace for timeless finds.</p>
-          <p>Please verify your email to activate your account:</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="http://localhost:3000/vemail/${email}" 
-               style="background: #8B4513; color: white; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-size: 16px;">
-              ✅ Verify My Account
-            </a>
-          </div>
-          <p style="color: #888; font-size: 13px;">If you didn't register, please ignore this email.</p>
-        </div>
-      </div>
-    `;
-  } else if (type === "login") {
-    subject = "New Login Detected — Vintage Treasure";
-    html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
-        <div style="background: #8B4513; padding: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0;">🏺 Vintage Treasure</h1>
-        </div>
-        <div style="padding: 30px;">
-          <h2>Hello, ${name}! 🔐</h2>
-          <p>A new login was detected on your account.</p>
-          <p><strong>Time:</strong> ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</p>
-          <p>If this was you, no action needed. If not, please change your password immediately.</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="http://localhost:3000/changepassword" 
-               style="background: #c0392b; color: white; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-size: 16px;">
-              🔒 Change Password
-            </a>
-          </div>
-        </div>
-      </div>
-    `;
+// ✔ check SMTP once at startup
+transporter.verify((err) => {
+  if (err) {
+    console.log("❌ SMTP FAILED:", err.message);
+  } else {
+    console.log("✅ SMTP READY");
   }
+});
 
-  const mailOptions = {
-    from: '"Vintage Treasure" <dilshad2307j@gmail.com>',
-    to: email,
-    subject,
-    html,
-  };
+/**
+ * type:
+ * register → welcome mail
+ * login → login alert
+ * reset → password reset mail
+ */
+const sendMail = async (email, name, type = "register", newPassword = null) => {
+  try {
+    let subject = "";
+    let html = "";
 
-  transporter.sendMail(mailOptions, (err, info) => {
-    if (err) console.log("Mail error:", err);
-    else console.log(`[${type.toUpperCase()}] Email sent to ${email}:`, info.response);
-  });
-}
+    // 🔥 REGISTER
+    if (type === "register") {
+      subject = "Welcome to Vintage Treasure 🎉";
+      html = `
+        <h2>Hello ${name}</h2>
+        <p>Thanks for registering on Vintage Treasure ✔</p>
+      `;
+    }
+
+    // 🔥 LOGIN
+    else if (type === "login") {
+      subject = "Login Alert 🔐";
+      html = `
+        <h2>Hello ${name}</h2>
+        <p>You just logged in to your account ✔</p>
+      `;
+    }
+
+    // 🔥 RESET PASSWORD
+    else if (type === "reset") {
+      subject = "Password Reset 🔑";
+      html = `
+        <h2>Hello ${name}</h2>
+        <p>Your new password is:</p>
+        <h2 style="color:red">${newPassword}</h2>
+        <p>Please login and change it immediately.</p>
+      `;
+    }
+
+    const info = await transporter.sendMail({
+      from: `"Vintage Treasure" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject,
+      html,
+    });
+
+    console.log("📧 EMAIL SENT:", info.response);
+
+  } catch (err) {
+    console.log("❌ MAIL ERROR:", err.message);
+  }
+};
 
 export default sendMail;
