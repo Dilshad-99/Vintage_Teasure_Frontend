@@ -160,8 +160,8 @@
 
 
 import './ManageUser.css';
-import { useEffect, useState } from 'react';
-import api from '../../api';                    // ✅ api instance
+import { useEffect, useState, useCallback } from 'react';
+import api from '../../api';
 import { useToast } from '../../ToastContext';
 
 const PER_PAGE = 5;
@@ -174,15 +174,15 @@ function ManageUser() {
   const [search,  setSearch]  = useState('');
   const [page,    setPage]    = useState(1);
 
-  const fetchUsers = () => {
+  const fetchUsers = useCallback(() => {
     setLoading(true);
-    api.get('/user/fetch', { params: { role: "user" } })   // ✅ token auto-attach
+    api.get('/user/fetch', { params: { role: "user" } })
       .then(res => setUsers(res.data.userDetails || []))
       .catch(() => showToast("Failed to load users", "error"))
       .finally(() => setLoading(false));
-  };
+  }, [showToast]);
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
   const handleAction = (id, type) => {
     if (type === "delete") {
@@ -310,3 +310,6 @@ function ManageUser() {
 }
 
 export default ManageUser;
+
+
+

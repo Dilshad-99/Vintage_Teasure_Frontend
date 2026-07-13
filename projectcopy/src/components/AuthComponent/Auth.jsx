@@ -21,9 +21,6 @@ function Auth() {
 
   const userRoutes = ["/user", "/addproduct"];
 
-  // exact match helper (safer than startsWith)
-  const isExact = (list) => list.includes(pathname);
-
   const isPrefix = (list) =>
     list.some((route) => pathname.startsWith(route + "/") || pathname === route);
 

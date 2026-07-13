@@ -17,7 +17,7 @@ export const savecategory = async (req, res) => {
     const caticonnm = caticon.name;
 
     const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
-    const uploadfilepath = path.join(__dirname, '../projectcopy/public/assets/uploads/caticons', caticonnm);
+    const uploadfilepath = path.join(__dirname, 'uploads', caticonnm);
     
     const categoryDetails = { ...req.body, "caticonnm": caticonnm, "_id": _id };
 

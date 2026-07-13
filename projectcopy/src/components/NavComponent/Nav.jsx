@@ -32,7 +32,7 @@ function Nav() {
       showToast("Donation Successful 🎉", "success");
       localStorage.removeItem("paymentSuccess");
     }
-  }, []);
+  }, [showToast]);
 
   const closeMenu = () => setMenuOpen(false);
 

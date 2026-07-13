@@ -123,7 +123,6 @@ function Login() {
         <p className="auth-switch">
           New around here? <Link to="/register">Come join us</Link>
         </p>
-
       </form>
     </div>
   );

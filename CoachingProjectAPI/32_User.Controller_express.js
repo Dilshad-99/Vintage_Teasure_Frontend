@@ -922,7 +922,7 @@
 // import "./32_connection_express.js";
 // import UserSchemaModel from './32_User.model_express.js';
 
-// const JWT_SECRET = process.env.JWT_SECRET || "vintage_treasure_secret";
+// const JWT_SECRET = process.env.JWT_SECRET_KEY || "vintage_treasure_secret";
 
 // // ─────────────────────────────────────────
 // // REGISTER
@@ -1132,7 +1132,7 @@ import sendMail from "./32_nodeMailer.js";
 import "./32_connection_express.js";
 import UserSchemaModel from './32_User.model_express.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || "vintage_treasure_secret";
+const JWT_SECRET = process.env.JWT_SECRET_KEY || "vintage_treasure_secret";
 
 export const save = async (req, res) => {
   try {
@@ -1154,13 +1154,27 @@ export const save = async (req, res) => {
 
     console.log("✅ USER CREATED");
 
-    await sendMail(userDetails.email, userDetails.name, "register");
+    sendMail(userDetails.email, userDetails.name, "register").catch(err =>
+      console.log("📧 REGISTER MAIL SENT (mail skipped:", err.message, ")")
+    );
     console.log("📧 REGISTER MAIL SENT");
     res.status(201).json({ status: "OK", message: "Registered! Please verify your email." });
-const result = await UserSchemaModel.create(userDetails);
-console.log("✅ USER SAVED:", result);
   } catch (error) {
     console.log("Registration Error:", error.message);
+    console.log("Registration Error Stack:", error.stack);
+
+    console.log("Error name:", error.name, "code:", error.code, "kind:", error.kind);
+
+    if (error.code === 11000 || error.message?.includes("duplicate key") || error.message?.includes("E11000")) {
+      return res.status(409).json({ status: false, message: "Email already exists" });
+    }
+
+    if (error.name === "ValidationError") {
+      const field = Object.keys(error.errors)?.[0];
+      const msg = field ? error.errors[field].message : error.message;
+      return res.status(400).json({ status: false, message: msg });
+    }
+
     res.status(500).json({ status: false, error: error.message });
   }
 };
@@ -1188,15 +1202,18 @@ export const login = async (req, res) => {
       { expiresIn: "7d" }
     );
     console.log("STEP 1");
-    // ✅ MAIL ONLY AFTER SUCCESS LOGIN
-    await sendMail(user.email, user.name, "login");
-console.log("STEP 2");
+    sendMail(user.email, user.name, "login").catch(err =>
+      console.log("📧 LOGIN MAIL SKIPPED:", err.message)
+    );
+    console.log("STEP 2");
     console.log("📧 LOGIN MAIL SENT");
 
     res.status(200).json({ token, userDetails: user });
 
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    console.log("Login Error:", error.message);
+    console.log("Login Error Stack:", error.stack);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -1284,7 +1301,7 @@ export const changePassword = async (req, res) => {
     const hashedNew = await bcrypt.hash(newPassword, 10);
     await UserSchemaModel.updateOne(
       { email: email.toLowerCase() },
-      { $set: { password: hashedNew } }
+      { $set: { password: hashedNew }}
     );
 
     res.status(200).json({ status: true, message: "Password changed successfully" });

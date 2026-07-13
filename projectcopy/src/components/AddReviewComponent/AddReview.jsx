@@ -23,7 +23,7 @@ function AddReview() {
       showToast("Only admin allowed", "error");
       navigate(-1);
     }
-  }, []);
+  }, [navigate, role, showToast]);
 
   if (role !== "admin") return null;
 

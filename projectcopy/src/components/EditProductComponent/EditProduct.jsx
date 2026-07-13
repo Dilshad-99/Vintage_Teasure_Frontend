@@ -76,7 +76,7 @@ function EditProduct() {
     axios.get(`${__categoryapiurl}fetch`)
       .then(res => setCatList(res.data.userDetails || []))
       .catch(() => showToast('Could not load categories.', 'error'));
-  }, []);
+  }, [showToast]);
 
   // Load subcategories whenever category changes
   useEffect(() => {

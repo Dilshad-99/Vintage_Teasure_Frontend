@@ -1,7 +1,7 @@
 import './ForgetPassword.css';
 import { useState } from 'react';
 import axios from 'axios';
-import { __userapiurl, __forgetpasswordurl } from '../../API_URL';
+import { __forgetpasswordurl } from '../../API_URL';
 import { Link } from 'react-router-dom';
 import { useToast } from '../../ToastContext';
 

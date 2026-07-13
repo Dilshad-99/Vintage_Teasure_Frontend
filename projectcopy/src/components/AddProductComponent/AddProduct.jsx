@@ -32,14 +32,14 @@ function AddProduct() {
     if (userRole === "admin") {
       navigate(-1);
     }
-  }, []);
+  }, [navigate, userRole]);
 
   // load categories
   useEffect(() => {
     axios.get(__categoryapiurl + "fetch")
       .then(res => setCatList(res.data.userDetails || []))
       .catch(() => showToast("Cannot load categories", "error"));
-  }, []);
+  }, [showToast]);
 
   // load subcategories
   useEffect(() => {
@@ -56,7 +56,7 @@ function AddProduct() {
         setSubcatList([]);
       });
 
-  }, [catnm]);
+  }, [catnm, showToast]);
 
   // submit
   const handleSubmit = (e) => {

@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET || "vintage_treasure_secret";
+const JWT_SECRET = process.env.JWT_SECRET_KEY || "vintage_treasure_secret";
 
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;

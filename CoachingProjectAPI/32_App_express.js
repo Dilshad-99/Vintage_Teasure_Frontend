@@ -106,6 +106,7 @@ console.log("PASS:", process.env.NODEPASS);
 app.use(cors({
   origin: [
     'http://localhost:3000',
+    'http://192.168.0.217:3000',
     'https://vintage-teasure-fe.onrender.com',
   ],
   credentials: true,
@@ -135,9 +136,16 @@ app.get("/", (req, res) => {
   res.send("Backend Live");
 });
 
+// global error handler
+app.use((err, req, res, next) => {
+  console.error("🔥 UNHANDLED ERROR:", err?.message || err);
+  console.error("🔥 STACK:", err?.stack);
+  res.status(500).json({ status: false, message: "Internal server error", error: err?.message });
+});
+
 // server start
 app.listen(port, () => {
-  console.log(`🚀 Server running at http://localhost:${port}`);
+  console.log(`Server running at http://localhost:${port}`);
 });
 
 export default app;

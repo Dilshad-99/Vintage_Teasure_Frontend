@@ -3,7 +3,6 @@ import url from 'url';
 import path from 'path';
 import rs from 'randomstring';
 import SubCategorySchemaModel from "./32_SubCategory.Model.js";
-import Category from "./model1.js";
 
 // Save subcategory
 export const save = async (req, res) => {
@@ -18,7 +17,7 @@ export const save = async (req, res) => {
     const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
     const uploadfilepath = path.join(
       __dirname,
-      '../projectcopy/public/assets/uploads/subcaticons',
+      'uploads',
       caticonnm
     );
 
@@ -55,13 +54,13 @@ export const fetch = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     const condition_obj = JSON.parse(req.body.condition_obj);
-    const cDetails = await Category.findOne(condition_obj);
+    const cDetails = await SubCategorySchemaModel.findOne(condition_obj);
 
     if (!cDetails) {
       return res.status(404).json({ status: "Requested resource not available" });
     }
 
-    const result = await Category.deleteOne(condition_obj);
+    const result = await SubCategorySchemaModel.deleteOne(condition_obj);
 
     if (result.deletedCount > 0) {
       res.status(200).json({ status: true });
@@ -78,13 +77,13 @@ export const deleteUser = async (req, res) => {
 export const update = async (req, res) => {
   try {
     const condition_obj = JSON.parse(req.body.condition_obj);
-    const cDetails = await Category.findOne(condition_obj);
+    const cDetails = await SubCategorySchemaModel.findOne(condition_obj);
 
     if (!cDetails) {
       return res.status(404).json({ status: "Requested resource not available" });
     }
 
-    const result = await Category.updateMany(
+    const result = await SubCategorySchemaModel.updateMany(
       condition_obj,
       { $set: JSON.parse(req.body.content_obj) }
     );

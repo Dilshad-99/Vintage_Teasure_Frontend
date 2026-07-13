@@ -99,7 +99,7 @@ function App() {
 
         {location.pathname === '/' && <Sidebar />}
       </div>
-
+      
       <Footer />
     </div>
   );
